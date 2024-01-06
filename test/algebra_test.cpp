@@ -52,4 +52,16 @@ auto main() -> int
             gt(ei, 0 * ei) and  //
             ge(ei, 0 * ei));
       };
+
+  "blade uses canonical dimensions"_ctest = [] {
+    return expect(
+        eq(-e<1, 0>, e<0, 1>) and        //
+        eq(-e<2, 0>, e<0, 2>) and        //
+        eq(-e<2, 1>, e<1, 2>) and        //
+        eq(-e<0, 2, 1>, e<0, 1, 2>) and  //
+        eq(e<2, 0, 1>, e<0, 1, 2>) and   //
+        eq(-e<1, 0, 2>, e<0, 1, 2>) and  //
+        eq(e<1, 2, 0>, e<0, 1, 2>) and   //
+        eq(-e<2, 1, 0>, e<0, 1, 2>));
+  };
 }
