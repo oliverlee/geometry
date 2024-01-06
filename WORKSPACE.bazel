@@ -1,0 +1,179 @@
+workspace(name = "geometry")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+CXX_STANDARD = ["-std=c++17"]
+
+COMMON_CXX_WARNINGS = [
+    "-Werror",
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic",
+    "-Wconversion",
+    "-Wnon-virtual-dtor",
+    "-Wold-style-cast",
+    "-Wcast-align",
+    "-Wunused",
+    "-Woverloaded-virtual",
+    "-Wmisleading-indentation",
+    "-Wnull-dereference",
+    "-Wdouble-promotion",
+    "-Wformat=2",
+    "-Wimplicit-fallthrough",
+]
+
+# bazel_toolchain also loads rules_cc but an older version
+http_archive(
+    name = "rules_cc",
+    sha256 = "2037875b9a4456dce4a79d112a8ae885bbc4aad968e6587dca6e64f3a0900cdf",
+    strip_prefix = "rules_cc-0.0.9",
+    urls = ["https://github.com/bazelbuild/rules_cc/releases/download/0.0.9/rules_cc-0.0.9.tar.gz"],
+)
+
+BAZEL_BOOTLIN_COMMIT = "d15e4b4c3a984668d1d6bd5f3ca032efecae5cb1"
+
+http_archive(
+    name = "bazel_bootlin",
+    integrity = "sha256-kBlWjcV2AXGblkqCNxg1/bs2c6YLrLHqLgSbwsAcCl8=",
+    strip_prefix = "bazel_bootlin-{commit}".format(
+        commit = BAZEL_BOOTLIN_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel_bootlin/archive/{commit}.tar.gz".format(
+        commit = BAZEL_BOOTLIN_COMMIT,
+    ),
+)
+
+load("@bazel_bootlin//:defs.bzl", "bootlin_toolchain")
+
+bootlin_toolchain(
+    name = "gcc_toolchain",
+    # x86-64-v3 should cover CPUs released after ~2015.
+    # see https://www.phoronix.com/news/GCC-11-x86-64-Feature-Levels.
+    architecture = "x86-64-v3",
+    # see https://toolchains.bootlin.com/releases_x86-64-v3.html
+    buildroot_version = "bleeding-edge-2023.08-1",
+    extra_cxx_flags = [
+        "-fdiagnostics-color=always",
+        "-Wduplicated-cond",
+        "-Wduplicated-branches",
+        "-Wlogical-op",
+        "-Wuseless-cast",
+        "-Wshadow=compatible-local",
+    ] + COMMON_CXX_WARNINGS + CXX_STANDARD,
+    libc_impl = "glibc",
+)
+
+BAZEL_TOOLCHAIN_COMMIT = "ade23e0e37c5308162c012a4f4224459c1c4fa22"
+
+http_archive(
+    name = "bazel_toolchain",
+    sha256 = "968e507ce913b93971aeb77b4b0a96f7b59b1f51cbaae57aefef4c573776ed56",
+    strip_prefix = "bazel-toolchain-{commit}".format(
+        commit = BAZEL_TOOLCHAIN_COMMIT,
+    ),
+    url = "https://github.com/grailbio/bazel-toolchain/archive/{commit}.tar.gz".format(
+        commit = BAZEL_TOOLCHAIN_COMMIT,
+    ),
+)
+
+load("//tools:llvm_toolchain_dependencies.bzl", "llvm_toolchain_dependencies")
+
+llvm_toolchain_dependencies()
+
+load("//tools:llvm_toolchain.bzl", "llvm_toolchain")
+
+llvm_toolchain(
+    name = "llvm_toolchain",
+    cxx_flags = {
+        "": [
+            "-stdlib=libc++",
+            "-Wshadow",
+        ] + COMMON_CXX_WARNINGS + CXX_STANDARD,
+    },
+    # Link UBSan C++ runtime libraries if the `ubsan` feature is enabled
+    # https://github.com/bazelbuild/bazel/issues/12797#issuecomment-980641064
+    # use `link_libs` to prevent overriding default `link_flags`
+    # https://github.com/grailbio/bazel-toolchain/blob/ceeedcc4464322e05fe5b8df3749cc02273ee083/toolchain/cc_toolchain_config.bzl#L148-L150
+    link_libs = {
+        "": ["-fsanitize-link-c++-runtime"],
+    },
+    linux_x86_64_sysroot = "@gcc_toolchain_files//x86_64-buildroot-linux-gnu/sysroot",
+    llvm_version = "17.0.2",
+)
+
+# register llvm first, it has better error messages
+load("@llvm_toolchain//:toolchains.bzl", "llvm_register_toolchains")
+
+llvm_register_toolchains()
+
+register_toolchains(
+    "@gcc_toolchain//:toolchain",
+)
+
+BAZEL_CLANG_FORMAT_COMMIT = "ad5f2572518053b36a2d999f7b824fb5a7819ab4"
+
+http_archive(
+    name = "bazel_clang_format",
+    sha256 = "c31f0ea477dd0da84fc2c694a533797a9d2bf060f8cca8b5ea30402a47a2ea0a",
+    strip_prefix = "bazel_clang_format-{commit}".format(
+        commit = BAZEL_CLANG_FORMAT_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel_clang_format/archive/%s.tar.gz" % BAZEL_CLANG_FORMAT_COMMIT,
+)
+
+BAZEL_CLANG_TIDY_COMMIT = "aae87699cca19d8f6e84538576ab47587043d1d2"
+
+http_archive(
+    name = "bazel_clang_tidy",
+    sha256 = "ee7d89375b5c6554b40ea1b1132a8cf7e3e269f7c2f6b2f595e4c7181d44b736",
+    strip_prefix = "bazel_clang_tidy-{commit}".format(
+        commit = BAZEL_CLANG_TIDY_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/bazel_clang_tidy/archive/{commit}.tar.gz".format(
+        commit = BAZEL_CLANG_TIDY_COMMIT,
+    ),
+)
+
+http_archive(
+    name = "buildifier_prebuilt",
+    sha256 = "e46c16180bc49487bfd0f1ffa7345364718c57334fa0b5b67cb5f27eba10f309",
+    strip_prefix = "buildifier-prebuilt-6.1.0",
+    urls = [
+        "https://github.com/keith/buildifier-prebuilt/archive/6.1.0.tar.gz",
+    ],
+)
+
+load("@buildifier_prebuilt//:deps.bzl", "buildifier_prebuilt_deps")
+
+buildifier_prebuilt_deps()
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@buildifier_prebuilt//:defs.bzl", "buildifier_prebuilt_register_toolchains")
+
+buildifier_prebuilt_register_toolchains()
+
+http_archive(
+    name = "lcov",
+    build_file_content = """
+exports_files(glob(["**/*"]))
+""",
+    sha256 = "987031ad5528c8a746d4b52b380bc1bffe412de1f2b9c2ba5224995668e3240b",
+    strip_prefix = "lcov-1.16",
+    url = "https://github.com/linux-test-project/lcov/releases/download/v1.16/lcov-1.16.tar.gz",
+)
+
+SKYTEST_COMMIT = "4bfd605dd2b17f1a7f588bf16e3c95a737437a2e"
+
+http_archive(
+    name = "skytest",
+    integrity = "sha256-Rsnht1dLU1/4CDwWzaj7ty2LkcpalrJxzJJ3oUriY3s=",
+    strip_prefix = "skytest-{commit}".format(
+        commit = SKYTEST_COMMIT,
+    ),
+    url = "https://github.com/oliverlee/skytest/archive/{commit}.tar.gz".format(
+        commit = SKYTEST_COMMIT,
+    ),
+)

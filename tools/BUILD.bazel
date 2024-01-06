@@ -1,0 +1,91 @@
+load("@bazel_clang_format//:defs.bzl", "clang_format_update")
+load("@bazel_clang_tidy//:defs.bzl", "clang_tidy_apply_fixes")
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
+load("//rules:lcov.bzl", "lcov")
+
+clang_format_update(
+    name = "clang-format",
+    binary = "@llvm_toolchain//:clang-format",
+    config = "//:format_config",
+)
+
+clang_tidy_apply_fixes(
+    name = "clang-tidy-fix",
+    apply_replacements_binary = "@llvm_toolchain//:clang-apply-replacements",
+    tidy_binary = "@llvm_toolchain//:clang-tidy",
+    tidy_config = "//:tidy_config",
+)
+
+buildifier(
+    name = "buildifier.check",
+    lint_mode = "warn",
+    mode = "check",
+)
+
+buildifier(
+    name = "buildifier.fix",
+    lint_mode = "warn",
+    mode = "fix",
+)
+
+genrule(
+    name = "gen_verbose_clang_tidy",
+    srcs = [],
+    outs = ["verbose-clang-tidy.sh"],
+    # echo "$(dirname bazel-out/k8-fastbuild/bin/tools/verbose-clang-tidy.sh)/../<tidy-path>) ..."
+    cmd = """
+echo "$$(dirname $@)/../$(rootpath {tidy}) --enable-check-profile \\$$@" > $@
+""".format(
+        tidy = "@llvm_toolchain//:clang-tidy",
+    ),
+    executable = True,
+    tools = ["@llvm_toolchain//:clang-tidy"],
+)
+
+sh_binary(
+    name = "verbose-clang-tidy",
+    srcs = ["verbose-clang-tidy.sh"],
+    data = ["@llvm_toolchain//:clang-tidy"],
+)
+
+lcov_attrs = {
+    "instrumented_targets": ["//:skytest"],
+    "test_targets": ["//test/..."],
+    "coverage_opts": [
+        "--combined_report=lcov",
+        "--experimental_generate_llvm_lcov",
+        "--test_output=errors",
+        "--extra_toolchains=//toolchain:gcc",
+        # https://gcovr.com/en/stable/faq.html#why-does-c-code-have-so-many-uncovered-branches
+        # https://stackoverflow.com/questions/42003783/lcov-gcov-branch-coverage-with-c-producing-branches-all-over-the-place
+        "--cxxopt=-fno-exceptions",
+    ],
+}
+
+lcov(
+    name = "lcov_list",
+    coverage_opts = lcov_attrs["coverage_opts"],
+    instrumented_targets = lcov_attrs["instrumented_targets"],
+    lcov_opts = [
+        "--rc lcov_branch_coverage=1",
+        "--list",
+    ],
+    test_targets = lcov_attrs["test_targets"],
+)
+
+lcov(
+    name = "lcov_html",
+    coverage_opts = lcov_attrs["coverage_opts"],
+    instrumented_targets = lcov_attrs["instrumented_targets"],
+    lcov_opts = [
+        "--show-details",
+        "--keep-descriptions",
+        "--branch-coverage",
+        "--highlight",
+        "--demangle-cpp",
+        "--missed",
+        "--dark-mode",
+    ],
+    lcov_tool = "genhtml",
+    test_targets = lcov_attrs["test_targets"],
+)

@@ -1,0 +1,22 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//:__subpackages__"])
+
+exports_files(["README.md"])
+
+filegroup(
+    name = "format_config",
+    srcs = [".clang-format"],
+)
+
+filegroup(
+    name = "tidy_config",
+    srcs = [".clang-tidy"],
+)
+
+cc_library(
+    name = "geometry",
+    srcs = [],
+    hdrs = ["geometry/geometry.hpp"],
+    visibility = ["//visibility:public"],
+)
