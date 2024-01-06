@@ -1,8 +1,8 @@
 load("@rules_cc//cc:defs.bzl", "cc_test")
 
 cc_test(
-    name = "dummy_test",
-    srcs = ["dummy_test.cpp"],
+    name = "algebra_test",
+    srcs = ["algebra_test.cpp"],
     deps = [
         "//:geometry",
         "@skytest",
