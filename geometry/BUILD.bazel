@@ -4,6 +4,7 @@ cc_library(
     name = "geometry",
     srcs = [
         "src/algebra.hpp",
+        "src/detail/contract_dimensions.hpp",
         "src/detail/sort_dimensions.hpp",
         "src/detail/strictly_increasing.hpp",
     ],
