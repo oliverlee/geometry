@@ -172,6 +172,24 @@ public:
       return blade{-x.coefficient};
     }
 
+    /// addition
+    ///
+    [[nodiscard]]
+    friend constexpr auto
+    operator+(blade x, blade y) -> blade
+    {
+      return blade{x.coefficient + y.coefficient};
+    }
+
+    /// subtraction
+    ///
+    [[nodiscard]]
+    friend constexpr auto
+    operator-(blade x, blade y) -> blade
+    {
+      return blade{x.coefficient - y.coefficient};
+    }
+
     /// scalar multiplication
     ///
     /// @{
