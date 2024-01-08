@@ -1,6 +1,8 @@
 #pragma once
 
+#include "geometry/src/detail/all_same.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
+#include "geometry/src/detail/ordered.hpp"
 #include "geometry/src/detail/sort_dimensions.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
 
@@ -32,6 +34,20 @@ struct algebra
   ///
   template <std::size_t... Is>
   struct blade;
+
+  /// determines if a type is a blade
+  /// @tparam T type
+  ///
+  /// @{
+  template <class T>
+  struct is_blade : std::false_type
+  {};
+  template <std::size_t... Is>
+  struct is_blade<blade<Is...>> : std::true_type
+  {};
+  template <class T>
+  static constexpr auto is_blade_v = is_blade<T>::value;
+  /// @}
 
 private:
   template <std::size_t... Is>
@@ -216,6 +232,51 @@ public:
     {
       return x.coefficient * y.coefficient * e<Is..., Js...>;
     }
+  };
+
+  /// multivector
+  /// @tparam Bs blade types
+  ///
+  /// A linear combination of blades.
+  ///
+  /// @note a multivector may be composed of only blades with the same grade
+  ///
+  template <class... Bs>
+  struct multivector : Bs...
+  {
+    static_assert(
+        (is_blade_v<Bs> and ...), "`Bs` must be a specialization of blade");
+    static_assert(
+        detail::all_same_v<typename Bs::scalar_type...>,
+        "`Bs` must have the same scalar type");
+    static_assert(
+        detail::strictly_increasing(detail::ordered<Bs>{}...),
+        "`Bs` must be lexicographically sorted");
+
+    /// algebra type
+    ///
+    using algebra_type = algebra;
+
+    /// construct a multivector from blades
+    ///
+    constexpr multivector(Bs... bs) : Bs{bs}... {}
+
+    /// equality comparison
+    ///
+    /// @{
+    [[nodiscard]]
+    friend constexpr auto
+    operator==(const multivector& x, const multivector& y) -> bool
+    {
+      return ((static_cast<const Bs&>(x) == static_cast<const Bs&>(y)) and ...);
+    }
+    [[nodiscard]]
+    friend constexpr auto
+    operator!=(const multivector& x, const multivector& y) -> bool
+    {
+      return not(x == y);
+    }
+    /// @}
   };
 };
 
