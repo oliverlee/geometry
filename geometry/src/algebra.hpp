@@ -3,8 +3,9 @@
 #include "geometry/src/detail/all_same.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
 #include "geometry/src/detail/ordered.hpp"
-#include "geometry/src/detail/sort_dimensions.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
+#include "geometry/src/detail/type_list.hpp"
+#include "geometry/src/detail/type_sort.hpp"
 
 #include <cstddef>
 #include <type_traits>
@@ -35,6 +36,16 @@ struct algebra
   template <std::size_t... Is>
   struct blade;
 
+  /// multivector
+  /// @tparam Bs blade types
+  ///
+  /// A linear combination of blades.
+  ///
+  /// @note a multivector may be composed of only blades with the same grade
+  ///
+  template <class... Bs>
+  struct multivector;
+
   /// determines if a type is a blade
   /// @tparam T type
   ///
@@ -50,25 +61,29 @@ struct algebra
   /// @}
 
 private:
-  template <std::size_t... Is>
-  static auto rebind(std::index_sequence<Is...>) -> blade<Is...>;
+  template <class... Is>
+  static auto rebind(detail::type_list<Is...>) -> blade<Is::value...>;
 
   template <class Seq>
   using rebind_t = decltype(rebind(Seq{}));
 
   template <std::size_t... Is>
+  using sequence_t =
+      detail::type_list<std::integral_constant<std::size_t, Is>...>;
+
+  template <std::size_t... Is>
   using reified_blade_t = rebind_t<detail::contract_dimensions_t<
       detail::contraction_map::projective,
-      detail::sort_dimensions_t<std::index_sequence<Is...>>>>;
+      detail::type_sort_t<sequence_t<Is...>>>>;
 
   template <std::size_t... Is>
   static constexpr auto reified_blade_coefficient_v =
-      (detail::sort_dimensions_swap_count_v<std::index_sequence<Is...>> % 2 == 0
+      (detail::type_sort_swap_count_v<sequence_t<Is...>> % 2 == 0
            ? scalar_type{1}
            : -scalar_type{1}) *
       scalar_type{detail::contract_dimensions_coefficient_v<
           detail::contraction_map::projective,
-          detail::sort_dimensions_t<std::index_sequence<Is...>>>};
+          detail::type_sort_t<sequence_t<Is...>>>};
 
 public:
   /// unit blade
@@ -190,21 +205,38 @@ public:
 
     /// addition
     ///
+    /// @{
     [[nodiscard]]
     friend constexpr auto
     operator+(blade x, blade y) -> blade
     {
       return blade{x.coefficient + y.coefficient};
     }
+    template <std::size_t... Js>
+    [[nodiscard]]
+    friend constexpr auto
+    operator+(blade x, blade<Js...> y)
+    {
+      if constexpr (
+          detail::ordered<blade<Js...>>{} < detail::ordered<blade>{}) {
+        return multivector<blade<Js...>, blade>{y, x};
+      } else {
+        return multivector<blade, blade<Js...>>{x, y};
+      }
+    }
+    /// @}
 
     /// subtraction
     ///
+    /// @{
+    template <std::size_t... Js>
     [[nodiscard]]
     friend constexpr auto
-    operator-(blade x, blade y) -> blade
+    operator-(blade x, blade<Js...> y)
     {
-      return blade{x.coefficient - y.coefficient};
+      return x + -y;
     }
+    /// @}
 
     /// scalar multiplication
     ///
@@ -234,13 +266,6 @@ public:
     }
   };
 
-  /// multivector
-  /// @tparam Bs blade types
-  ///
-  /// A linear combination of blades.
-  ///
-  /// @note a multivector may be composed of only blades with the same grade
-  ///
   template <class... Bs>
   struct multivector : Bs...
   {

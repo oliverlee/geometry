@@ -1,5 +1,7 @@
 #pragma once
 
+#include "geometry/src/detail/type_list.hpp"
+
 #include <cstddef>
 #include <utility>
 
@@ -14,49 +16,27 @@ struct contraction_map
   };
 };
 
-template <
-    class Map,
-    class InSeq,
-    int Coeff = 1,
-    class OutSeq = std::index_sequence<>>
+template <class Map, class InSeq, int Coeff = 1, class OutSeq = type_list<>>
 struct contract_dimensions
 {
   using type = OutSeq;
   static constexpr auto coefficient = Coeff;
 };
-template <
-    class Map,
-    std::size_t I0,
-    std::size_t... Is,
-    int Coeff,
-    std::size_t... Js>
-struct contract_dimensions<
-    Map,
-    std::index_sequence<I0, Is...>,
-    Coeff,
-    std::index_sequence<Js...>>
-    : contract_dimensions<
-          Map,
-          std::index_sequence<Is...>,
-          Coeff,
-          std::index_sequence<Js..., I0>>
+template <class Map, class I0, class... Is, int Coeff, class... Js>
+struct contract_dimensions<Map, type_list<I0, Is...>, Coeff, type_list<Js...>>
+    : contract_dimensions<Map, type_list<Is...>, Coeff, type_list<Js..., I0>>
 {};
-template <
-    class Map,
-    std::size_t I0,
-    std::size_t... Is,
-    int Coeff,
-    std::size_t... Js>
+template <class Map, class I0, class... Is, int Coeff, class... Js>
 struct contract_dimensions<
     Map,
-    std::index_sequence<I0, I0, Is...>,
+    type_list<I0, I0, Is...>,
     Coeff,
-    std::index_sequence<Js...>>
+    type_list<Js...>>
     : contract_dimensions<
           Map,
-          std::index_sequence<Is...>,
-          Coeff * Map::template value<I0>,
-          std::index_sequence<Js...>>
+          type_list<Is...>,
+          Coeff * Map::template value<I0{}>,
+          type_list<Js...>>
 {};
 
 template <class Map, class Seq>

@@ -45,4 +45,12 @@ auto main() -> int
   "multivector with same elements comparable"_ctest *
       param_ref<multivectors> =  //
       [](auto v) { return expect(eq(v, v)); };
+
+  "multivector constructible from blade addition"_ctest =  //
+      [] {
+        return expect(
+            eq(multivector(2 * e<0>, 3 * e<1>), 2 * e<0> + 3 * e<1>) and
+            eq(multivector(2 * e<0>, 3 * e<1>), 3 * e<1> + 2 * e<0>) and
+            eq(multivector(-2 * e<0>, 3 * e<1>), 3 * e<1> - 2 * e<0>));
+      };
 }
