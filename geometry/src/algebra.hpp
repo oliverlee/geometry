@@ -284,7 +284,7 @@ public:
 
     /// construct a multivector from blades
     ///
-    constexpr multivector(Bs... bs) : Bs{bs}... {}
+    constexpr explicit multivector(Bs... bs) : Bs{bs}... {}
 
     /// equality comparison
     ///
@@ -302,6 +302,15 @@ public:
       return not(x == y);
     }
     /// @}
+
+    /// unary negation
+    ///
+    [[nodiscard]]
+    friend constexpr auto
+    operator-(const multivector& x) -> multivector
+    {
+      return multivector{-static_cast<Bs>(x)...};
+    }
   };
 };
 
