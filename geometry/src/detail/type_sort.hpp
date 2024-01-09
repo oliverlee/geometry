@@ -22,7 +22,7 @@ struct sort_swap_first<type_list<I0>, type_list<Js...>>
 template <class I0, class I1, class... Is, class... Js>
 struct sort_swap_first<type_list<I0, I1, Is...>, type_list<Js...>>
     : std::conditional_t<
-          (I0{} > I1{}),
+          (I1{} < I0{}),
           sort_swap_first<type_list<>, type_list<Js..., I1, I0, Is...>>,
           sort_swap_first<type_list<I1, Is...>, type_list<Js..., I0>>>
 {};

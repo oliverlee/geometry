@@ -46,7 +46,7 @@ auto main() -> int
       param_ref<multivectors> =  //
       [](auto v) { return expect(eq(v, v)); };
 
-  "multivector constructible from blade addition"_ctest =  //
+  "multivector constructible from blade addition/subtraction"_ctest =  //
       [] {
         return expect(
             eq(multivector(2 * e<0>, 3 * e<1>), 2 * e<0> + 3 * e<1>) and
@@ -59,5 +59,36 @@ auto main() -> int
         return expect(
             eq(e<0> + e<1>, -(-e<0> - e<1>)) and
             eq(e<0, 1> + e<1, 2>, -(-e<0, 1> - e<1, 2>)));
+      };
+
+  "multivectors addable"_ctest =  //
+      [] {
+        constexpr auto z = multivector(2 * e<0>, 3 * e<1>, 4 * e<2>);
+
+        return expect(
+            eq(z, 2 * e<0> + 3 * e<1> + 4 * e<2>) and    //
+            eq(z, (2 * e<0> + 3 * e<1>)+4 * e<2>) and    //
+            eq(z, 2 * e<0> + (3 * e<1> + 4 * e<2>)) and  //
+            eq(z, z + 0 * e<0>) and                      //
+            eq(z, z + 0 * e<0> + 0 * e<1>) and           //
+            eq(z, z + (0 * e<0> + 0 * e<1>)) and
+
+            eq(2 * e<0> + 3 * e<1> + 4 * e<2>, z) and    //
+            eq((2 * e<0> + 3 * e<1>)+4 * e<2>, z) and    //
+            eq(2 * e<0> + (3 * e<1> + 4 * e<2>), z) and  //
+            eq(z + 0 * e<0>, z) and                      //
+            eq(z + 0 * e<0> + 0 * e<1>, z) and           //
+            eq(z + (0 * e<0> + 0 * e<1>), z));
+      };
+
+  "multivectors subtractible"_ctest =  //
+      [] {
+        constexpr auto z = multivector(2 * e<0>, 3 * e<1>, 4 * e<2>);
+
+        return expect(
+            eq(z, z + z - z) and  //
+            eq(-z, decltype(z){} - z) and
+            eq(z, (2 * e<0> + 4 * e<1>)-(e<1> - 4 * e<2>)) and  //
+            eq(z, z - 0 * e<0>) and eq(-z, 0 * e<0> - z));
       };
 }
