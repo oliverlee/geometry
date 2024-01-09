@@ -59,6 +59,18 @@ auto main() -> int
   "blade subtraction"_ctest * param_ref<unit_blades> =  //
       [](auto ei) { return expect(eq(ei, 3 * ei - 2 * ei)); };
 
+  "blade addition assignment"_ctest * param_ref<unit_blades> =  //
+      [](auto ei) {
+        auto x = ei;
+        return expect(eq(3 * ei, x += 2 * ei));
+      };
+
+  "blade subtraction assignment"_ctest * param_ref<unit_blades> =  //
+      [](auto ei) {
+        auto x = ei;
+        return expect(eq(-ei, x -= 2 * ei));
+      };
+
   "blade uses canonical dimensions"_ctest = [] {
     return expect(
         eq(-e<1, 0>, e<0, 1>) and        //
