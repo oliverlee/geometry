@@ -99,4 +99,40 @@ auto main() -> int
             eq(z, (2 * e<0> + 4 * e<1>)-(e<1> - 4 * e<2>)) and  //
             eq(z, z - 0 * e<0>) and eq(-z, 0 * e<0> - z));
       };
+
+  "squared 1-vector"_ctest =  //
+      [] {
+        const auto a = 3;
+        const auto b = 4;
+        const auto c = 2;
+
+        const auto m = a * e<1> + b * e<2> + c * e<0>;
+
+        return expect(eq(a * a + b * b, m * m));
+      };
+
+  "squared 2-vector"_ctest =  //
+      [] {
+        const auto x = 3;
+        const auto y = 4;
+        const auto z = 2;
+
+        const auto P = x * e<0, 2> + y * e<0, 1> + z * e<1, 2>;
+
+        return expect(eq(-z * z, P * P));
+      };
+
+  "geometric product of multivector with blade"_ctest =  //
+      [] {
+        const auto a = 3;
+        const auto b = 4;
+        const auto c = 2;
+
+        const auto x = a * e<1> + b * e<2> + c * e<0>;
+        const auto y = e<0>;
+
+        const auto z = -a * e<0, 1> - b * e<0, 2>;
+
+        return expect(eq(z, x * y) and eq(-z, y * x));
+      };
 }
