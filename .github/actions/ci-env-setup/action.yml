@@ -35,12 +35,11 @@ runs:
         echo "startup --output_base=$HOME/bazel_cache/output_base" >> ~/.bazelrc
         echo "common --repository_cache=$HOME/bazel_cache/repository_cache" >> ~/.bazelrc
 
-    - name: mount bazel install base, output base, repository cache
-      uses: actions/cache@v3
+    - name: restore bazel install base, output base, repository cache
+      uses: actions/cache/restore@v3
       with:
         path: |
           ~/bazel_cache/install_base
           ~/bazel_cache/output_base/external
           ~/bazel_cache/repository_cache
         key: ${{ inputs.bazel-cache-key }}
-
