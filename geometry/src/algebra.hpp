@@ -224,6 +224,7 @@ public:
         return multivector<blade, blade<Js...>>{x, y};
       }
     }
+    friend constexpr auto& operator+=(blade& x, blade y) { return x = x + y; }
     /// @}
 
     /// subtraction
@@ -236,6 +237,7 @@ public:
     {
       return x + -y;
     }
+    friend constexpr auto& operator-=(blade& x, blade y) { return x = x - y; }
     /// @}
 
     /// scalar multiplication
