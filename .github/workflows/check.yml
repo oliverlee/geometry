@@ -17,11 +17,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
     - uses: ./.github/actions/ci-env-setup
       with:
-        bazel-cache-key: bazel-test-${{ matrix.toolchain }}-${{ matrix.feature }}
-
+        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
         bazel \
           test \
@@ -33,15 +31,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
     - uses: ./.github/actions/ci-env-setup
       with:
-        bazel-cache-key: bazel-coverage
-
+        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
-        bazel \
-          run \
-          //tools:lcov_list
+        bazel run //tools:lcov_list
 
     - uses: codecov/codecov-action@v3
       with:
@@ -64,27 +58,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-
     - uses: ./.github/actions/ci-env-setup
       with:
-        bazel-cache-key: bazel-build-${{ matrix.flag }}
-
+        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
-        bazel \
-          build \
-          ${{ matrix.flag }} \
-          //...
+        bazel build ${{ matrix.flag }} //...
 
   buildifier:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-
     - uses: ./.github/actions/ci-env-setup
       with:
-        bazel-cache-key: bazel-buildifier
-
+        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
-        bazel \
-          run \
-          //tools:buildifier.check
+        bazel run //tools:buildifier.check
