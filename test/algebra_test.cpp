@@ -71,4 +71,28 @@ auto main() -> int
         eq(1, e<1, 1>) and  //
         eq(1, e<2, 2>));
   };
+
+  "cayley table"_ctest = [] {
+    return expect(
+        eq(1, e<> * e<>) and                //
+        eq(0, e<0> * e<0>) and              //
+        eq(1, e<1> * e<1>) and              //
+        eq(1, e<2> * e<2>) and              //
+        eq(0, e<0, 1> * e<0, 1>) and        //
+        eq(0, e<0, 2> * e<0, 2>) and        //
+        eq(-1, e<1, 2> * e<1, 2>) and       //
+        eq(0, e<0, 1, 2> * e<0, 1, 2>) and  //
+        eq(e<0, 1>, e<0> * e<1>) and        //
+        eq(e<0, 2>, e<0> * e<2>) and        //
+        eq(e<1, 2>, e<1> * e<2>) and        //
+        eq(-e<0, 1>, e<1> * e<0>) and       //
+        eq(-e<0, 2>, e<2> * e<0>) and       //
+        eq(-e<1, 2>, e<2> * e<1>) and       //
+        eq(e<0, 2>, e<0, 1> * e<1, 2>) and  //
+        eq(-e<0, 1>, e<0, 2> * e<1, 2>));
+  };
+
+  "geometric product"_ctest = [] {
+    return expect(eq(6, (2 * e<1>)*(3 * e<1>)));
+  };
 }
