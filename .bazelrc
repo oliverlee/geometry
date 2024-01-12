@@ -4,6 +4,19 @@ build --action_env="BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1"
 build --color=yes
 build --curses=yes
 
+build --bes_results_url=https://oliverlee.buildbuddy.io/invocation/
+build --bes_backend=grpcs://oliverlee.buildbuddy.io
+build --remote_cache=grpcs://oliverlee.buildbuddy.io
+build --remote_download_toplevel # Helps remove network bottleneck if caching is enabled
+build --remote_timeout=3600
+build --remote_header=x-buildbuddy-api-key=d2muxpY7kiZEFsS3wzCo
+build --experimental_remote_cache_compression
+build --remote_build_event_upload=minimal
+build --noslim_profile
+build --experimental_profile_include_target_label
+build --experimental_profile_include_primary_output
+build --nolegacy_important_outputs
+
 build:clang --extra_toolchains=//toolchain:clang
 build:gcc   --extra_toolchains=//toolchain:gcc
 
