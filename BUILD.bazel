@@ -16,7 +16,9 @@ filegroup(
 
 cc_library(
     name = "geometry",
-    srcs = [],
+    srcs = [
+        "geometry/src/algebra.hpp",
+    ],
     hdrs = ["geometry/geometry.hpp"],
     visibility = ["//visibility:public"],
 )
