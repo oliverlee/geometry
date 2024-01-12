@@ -53,4 +53,11 @@ auto main() -> int
             eq(multivector(2 * e<0>, 3 * e<1>), 3 * e<1> + 2 * e<0>) and
             eq(multivector(-2 * e<0>, 3 * e<1>), 3 * e<1> - 2 * e<0>));
       };
+
+  "multivector negation"_ctest =  //
+      [] {
+        return expect(
+            eq(e<0> + e<1>, -(-e<0> - e<1>)) and
+            eq(e<0, 1> + e<1, 2>, -(-e<0, 1> - e<1, 2>)));
+      };
 }
