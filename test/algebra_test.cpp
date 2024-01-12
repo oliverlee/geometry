@@ -53,6 +53,12 @@ auto main() -> int
             ge(ei, 0 * ei));
       };
 
+  "blade addition"_ctest * param_ref<unit_blades> =  //
+      [](auto ei) { return expect(eq(3 * ei, ei + 2 * ei)); };
+
+  "blade subtraction"_ctest * param_ref<unit_blades> =  //
+      [](auto ei) { return expect(eq(ei, 3 * ei - 2 * ei)); };
+
   "blade uses canonical dimensions"_ctest = [] {
     return expect(
         eq(-e<1, 0>, e<0, 1>) and        //
