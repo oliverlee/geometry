@@ -2,6 +2,7 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
 
 cc_test(
     name = "algebra_blade_test",
+    size = "small",
     srcs = ["algebra_blade_test.cpp"],
     deps = [
         "//:geometry",
@@ -11,6 +12,7 @@ cc_test(
 
 cc_test(
     name = "algebra_multivector_test",
+    size = "small",
     srcs = ["algebra_multivector_test.cpp"],
     deps = [
         "//:geometry",
