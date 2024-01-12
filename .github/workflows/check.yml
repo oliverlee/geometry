@@ -14,29 +14,44 @@ jobs:
       matrix:
         toolchain: [gcc, clang]
         feature: ['', asan, tsan, ubsan]
-
+    env:
+      PROFILE: profile-${{ matrix.toolchain }}-${{ matrix.feature }}.gz
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/ci-env-setup
       with:
-        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
+        buildbuddy-api-key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
         bazel \
           test \
+          --profile=$PROFILE \
           --config=${{ matrix.toolchain }} \
           --features=${{ matrix.feature }} \
           //...
 
+        bazel analyze-profile $PROFILE
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROFILE }}
+        path : ${{ env.PROFILE }}
+
   coverage:
     runs-on: ubuntu-latest
+    env:
+      PROFILE: profile-coverage.gz
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/ci-env-setup
       with:
-        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
+        buildbuddy-api-key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
-        bazel run //tools:lcov_list
+        bazel run --profile=$PROFILE //tools:lcov_list
 
+        bazel analyze-profile $PROFILE
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROFILE }}
+        path : ${{ env.PROFILE }}
     - uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
@@ -55,14 +70,21 @@ jobs:
           - '--compilation_mode=opt'
         exclude:
           - flag: ${{ github.event_name == 'pull_request' && '--config=verbose-clang-tidy' || 'dummy' }}
-
+    env:
+      PROFILE: profile-${{ matrix.flag }}.gz
     steps:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/ci-env-setup
       with:
-        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
+        buildbuddy-api-key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
-        bazel build ${{ matrix.flag }} //...
+        bazel build --profile=$PROFILE ${{ matrix.flag }} //...
+
+        bazel analyze-profile $PROFILE
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROFILE }}
+        path : ${{ env.PROFILE }}
 
   buildifier:
     runs-on: ubuntu-latest
@@ -70,6 +92,6 @@ jobs:
     - uses: actions/checkout@v3
     - uses: ./.github/actions/ci-env-setup
       with:
-        buildbuddy_api_key: ${{ secrets.BUILDBUDDY_API_KEY }}
+        buildbuddy-api-key: ${{ secrets.BUILDBUDDY_API_KEY }}
     - run: |
         bazel run //tools:buildifier.check
