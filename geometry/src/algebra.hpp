@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometry/src/detail/contract_dimensions.hpp"
 #include "geometry/src/detail/sort_dimensions.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
 
@@ -147,14 +148,18 @@ private:
   using rebind_t = decltype(rebind(Seq{}));
 
   template <std::size_t... Is>
-  using reified_blade_t =
-      rebind_t<detail::sort_dimensions_t<std::index_sequence<Is...>>>;
+  using reified_blade_t = rebind_t<detail::contract_dimensions_t<
+      detail::contraction_map::projective,
+      detail::sort_dimensions_t<std::index_sequence<Is...>>>>;
 
   template <std::size_t... Is>
   static constexpr auto reified_blade_coefficient_v =
-      detail::sort_dimensions_swap_count_v<std::index_sequence<Is...>> % 2 == 0
-          ? scalar_type{1}
-          : -scalar_type{1};
+      (detail::sort_dimensions_swap_count_v<std::index_sequence<Is...>> % 2 == 0
+           ? scalar_type{1}
+           : -scalar_type{1}) *
+      scalar_type{detail::contract_dimensions_coefficient_v<
+          detail::contraction_map::projective,
+          detail::sort_dimensions_t<std::index_sequence<Is...>>>};
 
 public:
   /// unit blade
@@ -174,6 +179,9 @@ public:
   /// ~~~{.cpp}
   /// static_assert(2 == 2*e<>);
   /// ~~~
+  ///
+  /// Squared basis vectors in a blade (i.e. `e<i, i>`) will contract to `0` for
+  /// `i == 0` and `1` for `i != 0`.
   ///
   template <std::size_t... Is>
   static constexpr auto e =

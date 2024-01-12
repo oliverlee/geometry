@@ -64,4 +64,11 @@ auto main() -> int
         eq(e<1, 2, 0>, e<0, 1, 2>) and   //
         eq(-e<2, 1, 0>, e<0, 1, 2>));
   };
+
+  "duplicated (squared) basis vectors contract"_ctest = [] {
+    return expect(
+        eq(0, e<0, 0>) and  //
+        eq(1, e<1, 1>) and  //
+        eq(1, e<2, 2>));
+  };
 }
