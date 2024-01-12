@@ -1,15 +1,16 @@
 #pragma once
 
 #include "geometry/src/detail/all_same.hpp"
+#include "geometry/src/detail/blade_list.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
 #include "geometry/src/detail/get_type.hpp"
 #include "geometry/src/detail/ordered.hpp"
 #include "geometry/src/detail/rebind_args_into.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
 #include "geometry/src/detail/type_for_each.hpp"
-#include "geometry/src/detail/type_list.hpp"
 #include "geometry/src/detail/type_sort.hpp"
 #include "geometry/src/detail/type_unique.hpp"
+#include "geometry/src/type_list.hpp"
 
 #include <cstddef>
 #include <ostream>
@@ -43,6 +44,10 @@ struct algebra
   ///
   using scalar_type = S;
 
+  /// algebra dimension
+  ///
+  static constexpr auto dimension = N + 1;
+
   /// blade
   /// @tparam Is dimensions
   ///
@@ -75,16 +80,19 @@ struct algebra
   static constexpr auto is_blade_v = is_blade<T>::value;
   /// @}
 
+  /// list of blades in the algebra
+  ///
+  using blade_list_type = detail::blade_list_t<blade>;
+
 private:
   template <class... Is>
-  static auto rebind(detail::type_list<Is...>) -> blade<Is::value...>;
+  static auto rebind(type_list<Is...>) -> blade<Is::value...>;
 
   template <class Seq>
   using rebind_t = decltype(rebind(Seq{}));
 
   template <std::size_t... Is>
-  using sequence_t =
-      detail::type_list<std::integral_constant<std::size_t, Is>...>;
+  using sequence_t = type_list<std::integral_constant<std::size_t, Is>...>;
 
   template <std::size_t... Is>
   using reified_blade_t = rebind_t<detail::contract_dimensions_t<
@@ -462,7 +470,6 @@ public:
       using detail::ordered;
       using detail::rebind_args_into_t;
       using detail::type_for_each_t;
-      using detail::type_list;
       using detail::type_sort_t;
       using detail::type_unique_t;
 
