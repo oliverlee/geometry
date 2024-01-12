@@ -1,0 +1,12 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+cc_library(
+    name = "geometry",
+    srcs = [
+        "src/algebra.hpp",
+        "src/detail/sort_dimensions.hpp",
+        "src/detail/strictly_increasing.hpp",
+    ],
+    hdrs = ["geometry.hpp"],
+    visibility = ["//:__subpackages__"],
+)

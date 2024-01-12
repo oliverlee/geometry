@@ -49,7 +49,7 @@ sh_binary(
 )
 
 lcov_attrs = {
-    "instrumented_targets": ["//:geometry"],
+    "instrumented_targets": ["//geometry"],
     "test_targets": ["//test/..."],
     "coverage_opts": [
         "--combined_report=lcov",
