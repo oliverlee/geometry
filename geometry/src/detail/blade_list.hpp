@@ -1,10 +1,7 @@
 #pragma once
 
-#include "geometry/src/detail/index_constant_sequence.hpp"
 #include "geometry/src/detail/ordered_dimensions.hpp"
-#include "geometry/src/detail/type_flatten.hpp"
-#include "geometry/src/detail/type_for_each.hpp"
-#include "geometry/src/type_list.hpp"
+#include "geometry/type_metaprogramming.hpp"
 
 #include <cstddef>
 #include <utility>
@@ -33,11 +30,11 @@ struct grade
 
     template <std::size_t... Is>
     static auto impl(std::index_sequence<Is...>)
-        -> type_list<as_blade_t<Is, dimensions>...>;
+        -> tmp::list<as_blade_t<Is, dimensions>...>;
 
     template <std::size_t I>
     static auto impl(std::index_sequence<I>)
-        -> std::enable_if_t<I == 0 and K::value == 0, type_list<blade<>>>;
+        -> std::enable_if_t<I == 0 and K::value == 0, tmp::list<blade<>>>;
 
     using type = decltype(impl(std::make_index_sequence<dimensions.size()>{}));
   };
@@ -48,8 +45,8 @@ struct blade_list
 {
   static constexpr auto N = blade<>::algebra_type::dimension;
 
-  using type = type_flatten_t<type_for_each_t<
-      index_constant_sequence_t<N + 1>,
+  using type = tmp::flatten_t<tmp::transform_t<
+      tmp::make_index_constant_sequence<N + 1>,
       grade<blade, N>::template choose_k>>;
 };
 

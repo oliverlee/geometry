@@ -1,25 +1,36 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
+    name = "type_metaprogramming",
+    srcs = [
+        "type_metaprogramming/empty.hpp",
+        "type_metaprogramming/flatten.hpp",
+        "type_metaprogramming/get_type.hpp",
+        "type_metaprogramming/index_constant_sequence.hpp",
+        "type_metaprogramming/list.hpp",
+        "type_metaprogramming/rebind_into.hpp",
+        "type_metaprogramming/same.hpp",
+        "type_metaprogramming/sort.hpp",
+        "type_metaprogramming/transform.hpp",
+        "type_metaprogramming/unique.hpp",
+    ],
+    hdrs = ["type_metaprogramming.hpp"],
+    visibility = ["//visibility:private"],
+)
+
+cc_library(
     name = "geometry",
     srcs = [
         "src/algebra.hpp",
-        "src/detail/all_same.hpp",
         "src/detail/blade_list.hpp",
         "src/detail/contract_dimensions.hpp",
         "src/detail/factorial.hpp",
-        "src/detail/get_type.hpp",
-        "src/detail/index_constant_sequence.hpp",
         "src/detail/ordered.hpp",
         "src/detail/ordered_dimensions.hpp",
-        "src/detail/rebind_args_into.hpp",
         "src/detail/strictly_increasing.hpp",
-        "src/detail/type_flatten.hpp",
-        "src/detail/type_for_each.hpp",
-        "src/detail/type_sort.hpp",
-        "src/detail/type_unique.hpp",
         "src/type_list.hpp",
     ],
     hdrs = ["geometry.hpp"],
     visibility = ["//:__subpackages__"],
+    deps = [":type_metaprogramming"],
 )

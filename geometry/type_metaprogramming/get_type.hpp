@@ -1,6 +1,6 @@
 #pragma once
 
-namespace geometry::detail {
+namespace geometry::type_metaprogramming {
 
 template <class T>
 struct get_type
@@ -11,4 +11,4 @@ struct get_type
 template <class T>
 using get_type_t = typename get_type<T>::type;
 
-}  // namespace geometry::detail
+}  // namespace geometry::type_metaprogramming
