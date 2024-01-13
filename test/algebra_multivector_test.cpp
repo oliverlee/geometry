@@ -2,6 +2,7 @@
 #include "skytest/skytest.hpp"
 
 #include <cstddef>
+#include <sstream>
 #include <tuple>
 #include <type_traits>
 
@@ -135,4 +136,16 @@ auto main() -> int
 
         return expect(eq(z, x * y) and eq(-z, y * x));
       };
+
+  "printable"_test = [] {
+    static const auto to_string = [](const auto& mvec) {
+      return (std::stringstream{} << mvec).str();
+    };
+
+    return expect(
+        eq("1", to_string(multivector(e<>))) and
+        eq("2*e0 + 3*e1 + 4*e2", to_string(2 * e<0> + 3 * e<1> + 4 * e<2>))
+
+    );
+  };
 }

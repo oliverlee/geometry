@@ -2,6 +2,7 @@
 #include "skytest/skytest.hpp"
 
 #include <cstddef>
+#include <sstream>
 #include <tuple>
 #include <type_traits>
 
@@ -112,5 +113,22 @@ auto main() -> int
 
   "geometric product"_ctest = [] {
     return expect(eq(6, (2 * e<1>)*(3 * e<1>)));
+  };
+
+  "printable"_test = [] {
+    static const auto to_string = [](auto blade) {
+      return (std::stringstream{} << blade).str();
+    };
+
+    return expect(
+        eq("0*e0", to_string(0 * e<0>)) and          //
+        eq("e1", to_string(1 * e<1>)) and            //
+        eq("2*e2", to_string(2 * e<2>)) and          //
+        eq("3*e01", to_string(3 * e<0, 1>)) and      //
+        eq("4*e12", to_string(4 * e<1, 2>)) and      //
+        eq("5*e02", to_string(5 * e<0, 2>)) and      //
+        eq("6*e012", to_string(6 * e<0, 1, 2>)) and  //
+        eq("7", to_string(7 * e<>)) and              //
+        eq("1", to_string(e<>)));
   };
 }

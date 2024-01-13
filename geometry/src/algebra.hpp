@@ -12,6 +12,7 @@
 #include "geometry/src/detail/type_unique.hpp"
 
 #include <cstddef>
+#include <ostream>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -280,6 +281,27 @@ public:
     {
       return x.coefficient * y.coefficient * e<Is..., Js...>;
     }
+
+    /// stream insertion
+    ///
+    friend auto operator<<(std::ostream& os, blade x) -> std::enable_if_t<
+        (N < 10),
+        decltype(os << std::declval<const scalar_type&>(), os)>
+    {
+      if (sizeof...(Is) == 0) {
+        os << x.coefficient;
+        return os;
+      }
+
+      if (x.coefficient != scalar_type{1}) {
+        os << x.coefficient << "*";
+      }
+
+      os << "e";
+      std::ignore = ((os << Is, true) and ...);
+
+      return os;
+    }
   };
 
   template <class... Bs>
@@ -512,6 +534,22 @@ public:
       return ((x * get<B2s>(y)) + ...);
     }
     /// @}
+
+    /// stream insertion
+    ///
+    friend auto operator<<(std::ostream& os, const multivector& x)
+        -> decltype(((os << std::declval<const Bs&>(), true) and ...), os)
+    {
+      auto first = true;
+
+      std::ignore =
+          ((os << (std::exchange(first, false) ? "" : " + "),
+            os << get<Bs>(x),
+            true) and
+           ...);
+
+      return os;
+    }
   };
 };
 
