@@ -46,6 +46,14 @@ auto main() -> int
       param_ref<multivectors> =  //
       [](auto v) { return expect(eq(v, v)); };
 
+  "multivector with different elements comparable"_ctest =  //
+      [] {
+        return expect(
+            eq(0 * e<0> + e<1>, e<1> + 0 * e<2>) and  //
+            eq(e<1>, e<1> + 0 * e<2>) and             //
+            eq(0 * e<0> + e<1>, e<1>));
+      };
+
   "multivector constructible from blade addition/subtraction"_ctest =  //
       [] {
         return expect(

@@ -341,21 +341,68 @@ public:
     }
     /// @}
 
+    /// access a specific blade or return a default value
+    ///
+    /// @{
+    template <class B>
+    friend constexpr auto
+    get_or(const multivector& x, const B& value) -> const B&
+    {
+      if constexpr (contains<B>) {
+        return get<B>(x);
+      } else {
+        return value;
+      }
+    }
+    /// @}
+
     /// equality comparison
     ///
     /// @{
+    template <class... B2s>
     [[nodiscard]]
     friend constexpr auto
-    operator==(const multivector& x, const multivector& y) -> bool
+    operator==(const multivector& x, const multivector<B2s...>& y) -> bool
     {
-      return ((static_cast<const Bs&>(x) == static_cast<const Bs&>(y)) and ...);
+      return ((get_or(x, Bs{}) == get_or(y, Bs{})) and ...) and
+             ((get_or(x, B2s{}) == get_or(y, B2s{})) and ...);
     }
+    template <class... B2s>
     [[nodiscard]]
     friend constexpr auto
-    operator!=(const multivector& x, const multivector& y) -> bool
+    operator!=(const multivector& x, const multivector<B2s...>& y) -> bool
     {
       return not(x == y);
     }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator==(const multivector& x, blade<Is...> y) -> bool
+    {
+      return x == multivector<blade<Is...>>{y};
+    }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator==(blade<Is...> x, const multivector& y) -> bool
+    {
+      return multivector<blade<Is...>>{x} == y;
+    }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator!=(const multivector& x, blade<Is...> y) -> bool
+    {
+      return not(x == y);
+    }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator!=(blade<Is...> x, const multivector& y) -> bool
+    {
+      return not(x == y);
+    }
+
     /// @}
 
     /// unary negation
