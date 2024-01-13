@@ -1,16 +1,10 @@
 #pragma once
 
-#include "geometry/src/detail/all_same.hpp"
 #include "geometry/src/detail/blade_list.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
-#include "geometry/src/detail/get_type.hpp"
 #include "geometry/src/detail/ordered.hpp"
-#include "geometry/src/detail/rebind_args_into.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
-#include "geometry/src/detail/type_for_each.hpp"
-#include "geometry/src/detail/type_sort.hpp"
-#include "geometry/src/detail/type_unique.hpp"
-#include "geometry/src/type_list.hpp"
+#include "geometry/type_metaprogramming.hpp"
 
 #include <cstddef>
 #include <ostream>
@@ -85,28 +79,25 @@ struct algebra
   using blade_list_type = detail::blade_list_t<blade>;
 
 private:
-  template <class... Is>
-  static auto rebind(type_list<Is...>) -> blade<Is::value...>;
+  template <template <class...> class list, class... Is>
+  static auto rebind(list<Is...>) -> blade<Is::value...>;
 
-  template <class Seq>
-  using rebind_t = decltype(rebind(Seq{}));
-
-  template <std::size_t... Is>
-  using sequence_t = type_list<std::integral_constant<std::size_t, Is>...>;
+  template <class L>
+  using rebind_t = decltype(rebind(L{}));
 
   template <std::size_t... Is>
   using reified_blade_t = rebind_t<detail::contract_dimensions_t<
       detail::contraction_map::projective,
-      detail::type_sort_t<sequence_t<Is...>>>>;
+      tmp::sort_t<tmp::index_constant_sequence<Is...>>>>;
 
   template <std::size_t... Is>
   static constexpr auto reified_blade_coefficient_v =
-      (detail::type_sort_swap_count_v<sequence_t<Is...>> % 2 == 0
+      (tmp::sort_swap_count_v<tmp::index_constant_sequence<Is...>> % 2 == 0
            ? scalar_type{1}
            : -scalar_type{1}) *
       scalar_type{detail::contract_dimensions_coefficient_v<
           detail::contraction_map::projective,
-          detail::type_sort_t<sequence_t<Is...>>>};
+          tmp::sort_t<tmp::index_constant_sequence<Is...>>>};
 
 public:
   /// unit blade
@@ -318,7 +309,7 @@ public:
     static_assert(
         (is_blade_v<Bs> and ...), "`Bs` must be a specialization of blade");
     static_assert(
-        detail::all_same_v<typename Bs::scalar_type...>,
+        tmp::same_v<typename Bs::scalar_type...>,
         "`Bs` must have the same scalar type");
     static_assert(
         detail::strictly_increasing(detail::ordered<Bs>{}...),
@@ -466,18 +457,13 @@ public:
     friend constexpr auto
     operator+(const multivector& x, const multivector<B2s...>& y)
     {
-      using detail::get_type;
       using detail::ordered;
-      using detail::rebind_args_into_t;
-      using detail::type_for_each_t;
-      using detail::type_sort_t;
-      using detail::type_unique_t;
 
-      using M = rebind_args_into_t<
-          type_for_each_t<
-              type_unique_t<
-                  type_sort_t<type_list<ordered<Bs>..., ordered<B2s>...>>>,
-              get_type>,
+      using M = tmp::rebind_into_t<
+          tmp::transform_t<
+              tmp::unique_t<
+                  tmp::sort_t<tmp::list<ordered<Bs>..., ordered<B2s>...>>>,
+              tmp::get_type>,
           multivector>;
 
       auto z = M{};

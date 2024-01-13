@@ -17,7 +17,7 @@ inline constexpr struct
       class... Bs,
       class = std::enable_if_t<
           sizeof...(Bs) != 0 and
-          ::geometry::detail::all_same_v<typename Bs::algebra_type...>>>
+          ::geometry::tmp::same_v<typename Bs::algebra_type...>>>
   [[nodiscard]]
   constexpr auto
   operator()(Bs... bs) const
