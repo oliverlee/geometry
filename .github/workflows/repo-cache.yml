@@ -1,0 +1,67 @@
+name: repo-cache
+
+on:
+  workflow_dispatch:
+
+jobs:
+  refresh-workflow-repo-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    env:
+      PROFILE: profile-repo-cache.gz
+    steps:
+    - uses: actions/checkout@v3
+    - uses: ./.github/actions/ci-env-setup
+      with:
+        buildbuddy-api-key: ${{ secrets.BUILDBUDDY_API_KEY }}
+    - name: fetch external deps
+      run: |
+        bazel \
+          build \
+          --nobuild \
+          --profile=$PROFILE \
+          --config=gcc \
+          //...
+        bazel analyze-profile $PROFILE
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.PROFILE }}
+        path : ${{ env.PROFILE }}
+    - name: print cache directories
+      run: |
+        ls -al ~/bazel_cache/install_base/
+        ls -al ~/bazel_cache/output_base/external/
+        ls -al ~/bazel_cache/repository_cache/
+
+        du -sh ~/bazel_cache/install_base/
+        du -sh ~/bazel_cache/output_base/external/
+        du -sh ~/bazel_cache/repository_cache/
+    - name: cleanup caches
+      # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#force-deletion-of-caches-overriding-default-cache-eviction-policy
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh extension install actions/gh-actions-cache
+
+        REPO=${{ github.repository }}
+
+        echo "Fetching list of cache key"
+        cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
+
+        set +e
+        echo "Deleting caches..."
+        for cacheKey in $cacheKeysForPR
+        do
+            gh actions-cache delete $cacheKey -R $REPO --confirm
+        done
+        echo "Done"
+    - name: save bazel install base, output base, repository cache
+      uses: actions/cache/save@v3
+      with:
+        path: |
+          ~/bazel_cache/install_base
+          ~/bazel_cache/output_base/external
+          ~/bazel_cache/repository_cache
+        key: bazel-external-cache
