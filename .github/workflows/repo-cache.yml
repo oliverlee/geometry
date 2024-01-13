@@ -1,6 +1,8 @@
 name: repo-cache
 
 on:
+  schedule:
+    - cron: "0 10 * * *" # UTC
   workflow_dispatch:
 
 jobs:
