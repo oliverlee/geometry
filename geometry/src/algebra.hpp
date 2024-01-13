@@ -486,6 +486,32 @@ public:
       return x + -y;
     }
     /// @}
+
+    /// geometric product
+    ///
+    /// @{
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator*(const multivector& x, blade<Is...> y)
+    {
+      return ((get<Bs>(x) * y) + ...);
+    }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator*(blade<Is...> x, const multivector& y)
+    {
+      return -y * x;
+    }
+    template <class... B2s>
+    [[nodiscard]]
+    friend constexpr auto
+    operator*(const multivector& x, const multivector<B2s...>& y)
+    {
+      return ((x * get<B2s>(y)) + ...);
+    }
+    /// @}
   };
 };
 
