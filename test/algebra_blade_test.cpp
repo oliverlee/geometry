@@ -131,4 +131,48 @@ auto main() -> int
         eq("7", to_string(7 * e<>)) and              //
         eq("1", to_string(e<>)));
   };
+
+  "blade list R_2,0,1"_test = [] {
+    using algebra = ::geometry::algebra<double, 2>;
+    using ::geometry::type_list;
+
+    return expect(
+        std::is_same_v<
+            type_list<
+                algebra::blade<>,
+                algebra::blade<0>,
+                algebra::blade<1>,
+                algebra::blade<2>,
+                algebra::blade<0, 1>,
+                algebra::blade<0, 2>,
+                algebra::blade<1, 2>,
+                algebra::blade<0, 1, 2>>,
+            algebra::blade_list_type>);
+  };
+
+  "blade list R_3,0,1"_test = [] {
+    using algebra = ::geometry::algebra<double, 3>;
+    using ::geometry::type_list;
+
+    return expect(
+        std::is_same_v<
+            type_list<
+                algebra::blade<>,
+                algebra::blade<0>,
+                algebra::blade<1>,
+                algebra::blade<2>,
+                algebra::blade<3>,
+                algebra::blade<0, 1>,
+                algebra::blade<0, 2>,
+                algebra::blade<0, 3>,
+                algebra::blade<1, 2>,
+                algebra::blade<1, 3>,
+                algebra::blade<2, 3>,
+                algebra::blade<0, 1, 2>,
+                algebra::blade<0, 1, 3>,
+                algebra::blade<0, 2, 3>,
+                algebra::blade<1, 2, 3>,
+                algebra::blade<0, 1, 2, 3>>,
+            algebra::blade_list_type>);
+  };
 }

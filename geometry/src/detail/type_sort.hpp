@@ -1,6 +1,6 @@
 #pragma once
 
-#include "geometry/src/detail/type_list.hpp"
+#include "geometry/src/type_list.hpp"
 
 #include <cstddef>
 #include <type_traits>
