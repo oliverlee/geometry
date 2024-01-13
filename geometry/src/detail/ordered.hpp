@@ -19,6 +19,9 @@ class ordered
     return std::tuple{Is...} < std::tuple{Js...};
   }
 
+public:
+  using type = B;
+
   template <class B2>
   friend constexpr auto operator<(ordered x, ordered<B2> y) -> bool
   {

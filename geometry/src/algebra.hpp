@@ -2,15 +2,29 @@
 
 #include "geometry/src/detail/all_same.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
+#include "geometry/src/detail/get_type.hpp"
 #include "geometry/src/detail/ordered.hpp"
+#include "geometry/src/detail/rebind_args_into.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
+#include "geometry/src/detail/type_for_each.hpp"
 #include "geometry/src/detail/type_list.hpp"
 #include "geometry/src/detail/type_sort.hpp"
+#include "geometry/src/detail/type_unique.hpp"
 
 #include <cstddef>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 
 namespace geometry {
+
+/// access a blade of a multivector
+///
+template <class B, class V>
+constexpr decltype(auto) get(V&& v)
+{
+  return get<B>(std::forward<V>(v));
+}
 
 /// represents a projective geometric algebra
 /// @tparam S scalar type
@@ -284,9 +298,48 @@ public:
     ///
     using algebra_type = algebra;
 
+    /// determine if a blade is contained in this multivector
+    ///
+    template <class B>
+    static constexpr auto contains = (std::is_same_v<B, Bs> or ...);
+
+    /// construct a zero multivector
+    ///
+    multivector() = default;
+
     /// construct a multivector from blades
     ///
     constexpr explicit multivector(Bs... bs) : Bs{bs}... {}
+
+    /// access a specific blade
+    ///
+    /// @{
+    template <class B>
+    friend constexpr auto
+    get(multivector& x) -> std::enable_if_t<contains<B>, B&>
+    {
+      return static_cast<B&>(x);
+    }
+    template <class B>
+    friend constexpr auto
+    get(const multivector& x) -> std::enable_if_t<contains<B>, const B&>
+    {
+      return static_cast<const B&>(x);
+    }
+    template <class B>
+    friend constexpr auto
+    // NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
+    get(multivector&& x) -> std::enable_if_t<contains<B>, B&&>
+    {
+      return static_cast<B&&>(x);
+    }
+    template <class B>
+    friend constexpr auto
+    get(const multivector&& x) -> std::enable_if_t<contains<B>, const B&&>
+    {
+      return static_cast<const B&&>(x);
+    }
+    /// @}
 
     /// equality comparison
     ///
@@ -313,6 +366,79 @@ public:
     {
       return multivector{-static_cast<Bs>(x)...};
     }
+
+    /// addition
+    ///
+    /// @{
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator+(const multivector& x, blade<Is...> y)
+    {
+      return x + multivector<blade<Is...>>{y};
+    }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator+(blade<Is...> x, const multivector& y)
+    {
+      return y + x;
+    }
+    template <class... B2s>
+    [[nodiscard]]
+    friend constexpr auto
+    operator+(const multivector& x, const multivector<B2s...>& y)
+    {
+      using detail::get_type;
+      using detail::ordered;
+      using detail::rebind_args_into_t;
+      using detail::type_for_each_t;
+      using detail::type_list;
+      using detail::type_sort_t;
+      using detail::type_unique_t;
+
+      using M = rebind_args_into_t<
+          type_for_each_t<
+              type_unique_t<
+                  type_sort_t<type_list<ordered<Bs>..., ordered<B2s>...>>>,
+              get_type>,
+          multivector>;
+
+      auto z = M{};
+
+      std::ignore = ((get<Bs>(z) = get<Bs>(x), true) and ...);
+      std::ignore = ((get<B2s>(z) += get<B2s>(y), true) and ...);
+
+      return z;
+    }
+    /// @}
+
+    /// subtraction
+    ///
+    /// @{
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator-(const multivector& x, blade<Is...> y)
+    {
+      return x + -y;
+    }
+    template <std::size_t... Is>
+    [[nodiscard]]
+    friend constexpr auto
+    operator-(blade<Is...> x, const multivector& y)
+    {
+      return x + -y;
+    }
+    template <class... B2s>
+    [[nodiscard]]
+    friend constexpr auto
+    operator-(const multivector& x, const multivector<B2s...>& y)
+        -> decltype(x + y)
+    {
+      return x + -y;
+    }
+    /// @}
   };
 };
 
