@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometry/expression_template.hpp"
 #include "geometry/src/detail/blade_list.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
 #include "geometry/src/detail/ordered.hpp"
@@ -510,7 +511,8 @@ public:
     friend constexpr auto
     operator*(const multivector& x, blade<Is...> y)
     {
-      return ((get<Bs>(x) * y) + ...);
+      using expression_template::leaf;
+      return eval(((leaf(get<Bs>(x)) * leaf(y)) + ...));
     }
     template <std::size_t... Is>
     [[nodiscard]]
@@ -524,7 +526,8 @@ public:
     friend constexpr auto
     operator*(const multivector& x, const multivector<B2s...>& y)
     {
-      return ((x * get<B2s>(y)) + ...);
+      using expression_template::leaf;
+      return eval(((leaf(x) * leaf(get<B2s>(y))) + ...));
     }
     /// @}
 
