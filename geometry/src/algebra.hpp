@@ -3,6 +3,7 @@
 #include "geometry/expression_template.hpp"
 #include "geometry/src/detail/blade_list.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
+#include "geometry/src/detail/geometric_product.hpp"
 #include "geometry/src/detail/ordered.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
 #include "geometry/type_metaprogramming.hpp"
@@ -506,28 +507,26 @@ public:
     /// geometric product
     ///
     /// @{
+    template <class... B2s>
+    [[nodiscard]]
+    friend constexpr auto
+    operator*(const multivector& x, const multivector<B2s...>& y)
+    {
+      return detail::geometric_product(x, y);
+    }
     template <std::size_t... Is>
     [[nodiscard]]
     friend constexpr auto
     operator*(const multivector& x, blade<Is...> y)
     {
-      using expression_template::leaf;
-      return eval(((leaf(get<Bs>(x)) * leaf(y)) + ...));
+      return x * multivector<blade<Is...>>{y};
     }
     template <std::size_t... Is>
     [[nodiscard]]
     friend constexpr auto
     operator*(blade<Is...> x, const multivector& y)
     {
-      return -y * x;
-    }
-    template <class... B2s>
-    [[nodiscard]]
-    friend constexpr auto
-    operator*(const multivector& x, const multivector<B2s...>& y)
-    {
-      using expression_template::leaf;
-      return eval(((leaf(x) * leaf(get<B2s>(y))) + ...));
+      return multivector<blade<Is...>>{x} * y;
     }
     /// @}
 
