@@ -4,10 +4,12 @@ cc_library(
     name = "type_metaprogramming",
     srcs = [
         "type_metaprogramming/cartesian_product.hpp",
+        "type_metaprogramming/convert_to_list.hpp",
+        "type_metaprogramming/convert_to_sequence.hpp",
         "type_metaprogramming/empty.hpp",
         "type_metaprogramming/flatten.hpp",
         "type_metaprogramming/get_type.hpp",
-        "type_metaprogramming/index_constant_sequence.hpp",
+        "type_metaprogramming/index_constant_list.hpp",
         "type_metaprogramming/list.hpp",
         "type_metaprogramming/rebind_into.hpp",
         "type_metaprogramming/same.hpp",

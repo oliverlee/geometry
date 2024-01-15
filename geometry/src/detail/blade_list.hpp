@@ -46,7 +46,7 @@ struct blade_list
   static constexpr auto N = blade<>::algebra_type::dimension;
 
   using type = tmp::flatten_t<tmp::transform_t<
-      tmp::make_index_constant_sequence<N + 1>,
+      tmp::convert_to_list_t<std::make_index_sequence<N + 1>, tmp::list>,
       grade<blade, N>::template choose_k>>;
 };
 

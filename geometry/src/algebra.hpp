@@ -81,25 +81,21 @@ struct algebra
   using blade_list_type = detail::blade_list_t<blade>;
 
 private:
-  template <template <class...> class list, class... Is>
-  static auto rebind(list<Is...>) -> blade<Is::value...>;
-
-  template <class L>
-  using rebind_t = decltype(rebind(L{}));
-
   template <std::size_t... Is>
-  using reified_blade_t = rebind_t<detail::contract_dimensions_t<
-      detail::contraction_map::projective,
-      tmp::sort_t<tmp::index_constant_sequence<Is...>>>>;
+  using reified_blade_t = tmp::convert_to_sequence_t<
+      detail::contract_dimensions_t<
+          detail::contraction_map::projective,
+          tmp::sort_t<tmp::index_constant_list<Is...>>>,
+      blade>;
 
   template <std::size_t... Is>
   static constexpr auto reified_blade_coefficient_v =
-      (tmp::sort_swap_count_v<tmp::index_constant_sequence<Is...>> % 2 == 0
+      (tmp::sort_swap_count_v<tmp::index_constant_list<Is...>> % 2 == 0
            ? scalar_type{1}
            : -scalar_type{1}) *
       scalar_type{detail::contract_dimensions_coefficient_v<
           detail::contraction_map::projective,
-          tmp::sort_t<tmp::index_constant_sequence<Is...>>>};
+          tmp::sort_t<tmp::index_constant_list<Is...>>>};
 
 public:
   /// unit blade

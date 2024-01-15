@@ -3,8 +3,8 @@
 namespace geometry::type_metaprogramming {
 
 template <class L, template <class...> class list2>
-struct rebind_into
-{};
+struct rebind_into;
+
 template <
     class... Ts,
     template <class...>
