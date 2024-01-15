@@ -34,7 +34,8 @@ struct op : enable_ring_operations<op<F, Args...>>
 
   std::tuple<Args...> args;
 
-  constexpr explicit op(Args... args) : args{args...} {}
+  constexpr explicit op(const Args&... args) : args{args...} {}
+  constexpr explicit op(const std::tuple<Args...>& args) : args{args} {}
 
   friend constexpr auto eval(op x) -> eval_type
   {

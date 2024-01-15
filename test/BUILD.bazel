@@ -19,3 +19,13 @@ cc_test(
         "@skytest",
     ],
 )
+
+cc_test(
+    name = "algebra_pruned_expressions_test",
+    size = "small",
+    srcs = ["algebra_pruned_expressions_test.cpp"],
+    deps = [
+        "//:geometry",
+        "@skytest",
+    ],
+)
