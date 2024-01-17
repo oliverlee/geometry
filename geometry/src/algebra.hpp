@@ -287,7 +287,16 @@ public:
     friend constexpr auto
     operator*(blade x, blade<Js...> y)
     {
-      return x.coefficient * y.coefficient * e<Is..., Js...>;
+      constexpr auto unit_blade_coeff =
+          reified_blade_coefficient_v<Is..., Js...>;
+      using B = reified_blade_t<Is..., Js...>;
+
+      if constexpr (unit_blade_coeff == 0) {
+        return B{};
+      } else {
+        const auto coeff = x.coefficient * y.coefficient;
+        return B{unit_blade_coeff == 1 ? coeff : -coeff};
+      }
     }
 
     /// stream insertion
@@ -478,7 +487,12 @@ public:
       auto z = M{};
 
       std::ignore = ((get<Bs>(z) = get<Bs>(x), true) and ...);
-      std::ignore = ((get<B2s>(z) += get<B2s>(y), true) and ...);
+      std::ignore =
+          (((multivector::contains<B2s>
+                 ? get<B2s>(z) += get<B2s>(y)
+                 : get<B2s>(z) = get<B2s>(y)),
+            true) and
+           ...);
 
       return z;
     }
