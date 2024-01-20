@@ -22,8 +22,12 @@ cc_library(
     name = "expression_template",
     srcs = [
         "expression_template/enable_ring_operations.hpp",
+        "expression_template/flattened.hpp",
+        "expression_template/is_associative.hpp",
         "expression_template/leaf.hpp",
+        "expression_template/multiplies.hpp",
         "expression_template/op.hpp",
+        "expression_template/plus.hpp",
     ],
     hdrs = ["expression_template.hpp"],
     visibility = ["//visibility:private"],

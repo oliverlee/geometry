@@ -8,6 +8,7 @@ namespace geometry::expression_template {
 template <class T>
 struct leaf : enable_ring_operations<leaf<T>>
 {
+  using func_type = void;
   using eval_type = const T&;
 
   template <class... Ts>
