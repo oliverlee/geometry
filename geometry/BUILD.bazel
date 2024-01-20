@@ -19,6 +19,17 @@ cc_library(
 )
 
 cc_library(
+    name = "expression_template",
+    srcs = [
+        "expression_template/enable_ring_operations.hpp",
+        "expression_template/leaf.hpp",
+        "expression_template/op.hpp",
+    ],
+    hdrs = ["expression_template.hpp"],
+    visibility = ["//visibility:private"],
+)
+
+cc_library(
     name = "geometry",
     srcs = [
         "src/algebra.hpp",
@@ -32,5 +43,8 @@ cc_library(
     ],
     hdrs = ["geometry.hpp"],
     visibility = ["//:__subpackages__"],
-    deps = [":type_metaprogramming"],
+    deps = [
+        ":expression_template",
+        ":type_metaprogramming",
+    ],
 )
