@@ -70,6 +70,9 @@ Checks: >
     # false positives,
     -readability-simplify-boolean-expr,
 
+    # false positives with overloaded operators (e.g. `^`),
+    -misc-redundant-expression,
+
 CheckOptions:
     - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
       value: true

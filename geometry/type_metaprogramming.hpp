@@ -7,6 +7,7 @@
 #include "geometry/type_metaprogramming/flatten.hpp"
 #include "geometry/type_metaprogramming/get_type.hpp"
 #include "geometry/type_metaprogramming/index_constant_list.hpp"
+#include "geometry/type_metaprogramming/last.hpp"
 #include "geometry/type_metaprogramming/list.hpp"
 #include "geometry/type_metaprogramming/rebind_into.hpp"
 #include "geometry/type_metaprogramming/same.hpp"
