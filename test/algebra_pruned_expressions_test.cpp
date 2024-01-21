@@ -1,6 +1,8 @@
 #include "geometry/geometry.hpp"
 #include "skytest/skytest.hpp"
 
+#include "test/test_same.hpp"
+
 #include <cstddef>
 #include <ostream>
 #include <type_traits>
@@ -50,6 +52,14 @@ struct counted_double
     ++counted_double::multiplies_count;
     return {x.value * y.value};
   }
+  friend auto operator==(counted_double x, counted_double y)
+  {
+    return x.value == y.value;
+  }
+  friend auto operator!=(counted_double x, counted_double y)
+  {
+    return x.value != y.value;
+  }
 
   friend auto& operator<<(std::ostream& os, counted_double d)
   {
@@ -68,6 +78,7 @@ int counted_double<Tag>::multiplies_count = int{};
 auto main() -> int
 {
   using namespace ::skytest::literals;
+  using ::geometry::test::same;
   using ::skytest::eq;
   using ::skytest::expect;
 
@@ -85,11 +96,11 @@ auto main() -> int
     T::plus_count = 0;
     T::multiplies_count = 0;
 
-    auto r = x * y;
+    const auto r = x * y;
 
-    static_assert(std::is_same_v<test::blade<>, decltype(r)>);
-
-    return expect(eq(0, T::plus_count) and eq(0, T::multiplies_count));
+    return expect(
+        same(test::blade<>{}, r) and eq(0, T::plus_count) and
+        eq(0, T::multiplies_count));
   };
 
   "null generators pruned (1 blade)"_test = [] {
@@ -104,14 +115,17 @@ auto main() -> int
     const auto x = a * test::e<1> + c * test::e<0>;
     const auto y = test::e<0>;
 
+    const auto expected = -a * test::e<0, 1>;
+
     T::plus_count = 0;
     T::multiplies_count = 0;
 
-    auto r = x * y;
+    const auto r = x * y;
 
-    static_assert(std::is_same_v<test::blade<0, 1>, decltype(r)>);
-
-    return expect(eq(0, T::plus_count) and eq(1, T::multiplies_count));
+    return expect(
+        same(expected, r) and     //
+        eq(0, T::plus_count) and  //
+        eq(1, T::multiplies_count));
   };
 
   "null generators pruned (2 blades)"_test = [] {
@@ -127,17 +141,17 @@ auto main() -> int
     const auto x = a * test::e<1> + b * test::e<2> + c * test::e<0>;
     const auto y = test::e<0>;
 
+    const auto expected = -a * test::e<0, 1> - b * test::e<0, 2>;
+
     T::plus_count = 0;
     T::multiplies_count = 0;
 
-    auto r = x * y;
+    const auto r = x * y;
 
-    static_assert(
-        std::is_same_v<
-            test::multivector<test::blade<0, 1>, test::blade<0, 2>>,
-            decltype(r)>);
-
-    return expect(eq(0, T::plus_count) and eq(2, T::multiplies_count));
+    return expect(
+        same(expected, r) and     //
+        eq(0, T::plus_count) and  //
+        eq(2, T::multiplies_count));
   };
 
   "null generators pruned (3)"_test = [] {
@@ -155,20 +169,18 @@ auto main() -> int
         a * test::e<1> + b * test::e<2> + c * test::e<0> + d * test::e<1, 2>;
     const auto y = test::e<0>;
 
+    const auto expected =
+        -a * test::e<0, 1> - b * test::e<0, 2> + d * test::e<0, 1, 2>;
+
     T::plus_count = 0;
     T::multiplies_count = 0;
 
-    auto r = x * y;
+    const auto r = x * y;
 
-    static_assert(
-        std::is_same_v<
-            test::multivector<
-                test::blade<0, 1>,
-                test::blade<0, 2>,
-                test::blade<0, 1, 2>>,
-            decltype(r)>);
-
-    return expect(eq(0, T::plus_count) and eq(3, T::multiplies_count));
+    return expect(
+        same(expected, r) and     //
+        eq(0, T::plus_count) and  //
+        eq(3, T::multiplies_count));
   };
 
   "geometric product contracts to zero scalar"_ctest =  //
@@ -181,10 +193,7 @@ auto main() -> int
 
         const auto x =
             a * test::e<0> + b * test::e<0, 1> + c * test::e<0, 1, 2>;
-        const auto z = x * x;
 
-        static_assert(std::is_same_v<const test::blade<>, decltype(z)>);
-
-        return expect(eq(0, z));
+        return expect(same(test::blade<>{}, x * x));
       };
 }
