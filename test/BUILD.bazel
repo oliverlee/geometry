@@ -1,4 +1,10 @@
-load("@rules_cc//cc:defs.bzl", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+cc_library(
+    name = "test_same",
+    hdrs = ["test_same.hpp"],
+    deps = ["@skytest"],
+)
 
 cc_test(
     name = "algebra_blade_test",
@@ -25,6 +31,7 @@ cc_test(
     size = "small",
     srcs = ["algebra_pruned_expressions_test.cpp"],
     deps = [
+        ":test_same",
         "//:geometry",
         "@skytest",
     ],
