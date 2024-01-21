@@ -1,14 +1,12 @@
 #pragma once
 
 #include "geometry/expression_template.hpp"
+#include "geometry/src/get.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <type_traits>
 
-namespace geometry::detail {
-
-template <class T>
-static auto get() -> void;
+namespace geometry {
 
 inline constexpr class
 {
@@ -75,16 +73,28 @@ inline constexpr class
     }
   }
 
+  template <template <class> class pred, class Expr, class T>
+  static constexpr auto prune(Expr expr, T empty_value)
+  {
+    if constexpr (pred<Expr>::value) {
+      return empty_value;
+    } else {
+      return expr;
+    }
+  }
+
   template <
       class... Ts,
       template <class...>
       class multivector,
       class... B1s,
-      class... B2s>
+      class... B2s,
+      class T>
   static constexpr auto
   impl(tmp::list<Ts...>,
        const multivector<B1s...>& x,
-       const multivector<B2s...>& y)
+       const multivector<B2s...>& y,
+       const T& zero)
   {
     using expression_template::leaf;
     using algebra_type = typename multivector<B1s...>::algebra_type;
@@ -94,20 +104,28 @@ inline constexpr class
           leaf(get<typename Ts::second_type>(y))) +
          ...);
 
-    auto zero = typename algebra_type::template blade<>{};
-
     return eval(
         prune<null_generator<algebra_type>::template expr>(z, leaf(zero)));
   }
 
 public:
-  template <template <class...> class multivector, class... B1s, class... B2s>
-  constexpr auto
-  operator()(const multivector<B1s...>& x, const multivector<B2s...>& y) const
+  template <
+      template <class...>
+      class multivector,
+      class... B1s,
+      class... B2s,
+      class T = typename multivector<B1s...>::algebra_type::template blade<>>
+  constexpr auto operator()(
+      const multivector<B1s...>& x,
+      const multivector<B2s...>& y,
+      const T& zero = {}) const
   {
     return impl(
-        tmp::cartesian_product_t<tmp::list<B1s...>, tmp::list<B2s...>>{}, x, y);
+        tmp::cartesian_product_t<tmp::list<B1s...>, tmp::list<B2s...>>{},
+        x,
+        y,
+        zero);
   }
 } geometric_product{};
 
-}  // namespace geometry::detail
+}  // namespace geometry

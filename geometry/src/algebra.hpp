@@ -1,11 +1,15 @@
 #pragma once
 
 #include "geometry/expression_template.hpp"
+#include "geometry/src/common_algebra_type.hpp"
 #include "geometry/src/detail/blade_list.hpp"
+#include "geometry/src/detail/construct_if_convertible.hpp"
 #include "geometry/src/detail/contract_dimensions.hpp"
-#include "geometry/src/detail/geometric_product.hpp"
 #include "geometry/src/detail/ordered.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
+#include "geometry/src/geometric_product.hpp"
+#include "geometry/src/get.hpp"
+#include "geometry/src/multivector_for.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <cstddef>
@@ -15,14 +19,6 @@
 #include <utility>
 
 namespace geometry {
-
-/// access a blade of a multivector
-///
-template <class B, class V>
-constexpr decltype(auto) get(V&& v)
-{
-  return get<B>(std::forward<V>(v));
-}
 
 /// represents a projective geometric algebra
 /// @tparam S scalar type
@@ -263,23 +259,6 @@ public:
     friend constexpr auto& operator-=(blade& x, blade y) { return x = x - y; }
     /// @}
 
-    /// scalar multiplication
-    ///
-    /// @{
-    [[nodiscard]]
-    friend constexpr auto
-    operator*(scalar_type a, blade x) -> blade
-    {
-      return blade{a * x.coefficient};
-    }
-    [[nodiscard]]
-    friend constexpr auto
-    operator*(blade x, scalar_type a) -> blade
-    {
-      return a * x;
-    }
-    /// @}
-
     /// geometric product
     ///
     template <std::size_t... Js>
@@ -349,6 +328,14 @@ public:
     /// construct a multivector from blades
     ///
     constexpr explicit multivector(Bs... bs) : Bs{bs}... {}
+
+    /// construct a multivector from a scalar
+    ///
+    template <
+        class T = multivector<blade<>>,
+        class = std::enable_if_t<std::is_same_v<T, multivector>>>
+    constexpr explicit multivector(scalar_type s) : multivector(blade<>{s})
+    {}
 
     /// access a specific blade
     ///
@@ -525,32 +512,6 @@ public:
     }
     /// @}
 
-    /// geometric product
-    ///
-    /// @{
-    template <class... B2s>
-    [[nodiscard]]
-    friend constexpr auto
-    operator*(const multivector& x, const multivector<B2s...>& y)
-    {
-      return detail::geometric_product(x, y);
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator*(const multivector& x, blade<Is...> y)
-    {
-      return x * multivector<blade<Is...>>{y};
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator*(blade<Is...> x, const multivector& y)
-    {
-      return multivector<blade<Is...>>{x} * y;
-    }
-    /// @}
-
     /// stream insertion
     ///
     friend auto operator<<(std::ostream& os, const multivector& x)
@@ -568,5 +529,18 @@ public:
     }
   };
 };
+
+/// geometric product
+///
+template <class T, class U, class A = common_algebra_type_t<T, U>>
+[[nodiscard]]
+constexpr auto
+operator*(const T& t, const U& u)
+{
+  using S = typename A::scalar_type;
+  return geometric_product(
+      multivector_for_t<A, T>{detail::construct_if_convertible<S>(t)},
+      multivector_for_t<A, U>{detail::construct_if_convertible<S>(u)});
+}
 
 }  // namespace geometry
