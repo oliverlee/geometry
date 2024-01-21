@@ -88,16 +88,27 @@ private:
           tmp::sort_t<tmp::index_constant_list<Is...>>>,
       blade>;
 
+public:
+  /// coefficient for blade product
+  ///
+  /// @{
+  template <std::size_t... Is>
+  struct reified_blade_coefficient
+      : std::integral_constant<
+            int,
+            (tmp::sort_swap_count_v<tmp::index_constant_list<Is...>> % 2 == 0
+                 ? 1
+                 : -1) *
+                detail::contract_dimensions_coefficient_v<
+                    detail::contraction_map::projective,
+                    tmp::sort_t<tmp::index_constant_list<Is...>>>>
+  {};
+
   template <std::size_t... Is>
   static constexpr auto reified_blade_coefficient_v =
-      (tmp::sort_swap_count_v<tmp::index_constant_list<Is...>> % 2 == 0
-           ? scalar_type{1}
-           : -scalar_type{1}) *
-      scalar_type{detail::contract_dimensions_coefficient_v<
-          detail::contraction_map::projective,
-          tmp::sort_t<tmp::index_constant_list<Is...>>>};
+      reified_blade_coefficient<Is...>::value;
+  /// @}
 
-public:
   /// unit blade
   /// @tparam Is dimensions
   ///
@@ -116,12 +127,12 @@ public:
   /// static_assert(2 == 2*e<>);
   /// ~~~
   ///
-  /// Squared basis vectors in a blade (i.e. `e<i, i>`) will contract to `0` for
-  /// `i == 0` and `1` for `i != 0`.
+  /// Squared basis vectors in a blade (i.e. `e<i, i>`) will contract to `0`
+  /// for `i == 0` and `1` for `i != 0`.
   ///
   template <std::size_t... Is>
   static constexpr auto e =
-      reified_blade_t<Is...>{reified_blade_coefficient_v<Is...>};
+      reified_blade_t<Is...>{scalar_type{reified_blade_coefficient_v<Is...>}};
 
   template <std::size_t... Is>
   struct blade
