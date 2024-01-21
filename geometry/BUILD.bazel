@@ -46,6 +46,7 @@ cc_library(
         "src/detail/construct_if_convertible.hpp",
         "src/detail/contract_dimensions.hpp",
         "src/detail/factorial.hpp",
+        "src/detail/multivector_product.hpp",
         "src/detail/ordered.hpp",
         "src/detail/ordered_dimensions.hpp",
         "src/detail/strictly_increasing.hpp",

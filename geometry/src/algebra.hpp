@@ -406,50 +406,50 @@ public:
 /// equality comparison
 ///
 /// @{
-template <class T, class U, class A = common_algebra_type_t<T, U>>
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
 [[nodiscard]]
 constexpr auto
-operator==(const T& t, const U& u)
+operator==(const T1& x, const T2& y)
 {
-  return std::equal_to<>{}(to_multivector<A>(t), to_multivector<A>(u));
+  return std::equal_to<>{}(to_multivector<A>(x), to_multivector<A>(y));
 }
-template <class T, class U, class A = common_algebra_type_t<T, U>>
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
 [[nodiscard]]
 constexpr auto
-operator!=(const T& t, const U& u)
+operator!=(const T1& x, const T2& y)
 {
-  return not std::equal_to<>{}(to_multivector<A>(t), to_multivector<A>(u));
+  return not std::equal_to<>{}(to_multivector<A>(x), to_multivector<A>(y));
 }
 /// @}
 
 /// addition
 ///
-template <class T, class U, class A = common_algebra_type_t<T, U>>
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
 [[nodiscard]]
 constexpr auto
-operator+(const T& t, const U& u)
+operator+(const T1& x, const T2& y)
 {
-  return sum(to_multivector<A>(t), to_multivector<A>(u));
+  return sum(x, y);
 }
 
 /// subtraction
 ///
-template <class T, class U, class A = common_algebra_type_t<T, U>>
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
 [[nodiscard]]
 constexpr auto
-operator-(const T& t, const U& u)
+operator-(const T1& x, const T2& y)
 {
-  return t + -u;
+  return x + -y;
 }
 
 /// geometric product
 ///
-template <class T, class U, class A = common_algebra_type_t<T, U>>
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
 [[nodiscard]]
 constexpr auto
-operator*(const T& t, const U& u)
+operator*(const T1& x, const T2& y)
 {
-  return geometric_product(to_multivector<A>(t), to_multivector<A>(u));
+  return geometric_product(x, y);
 }
 
 }  // namespace geometry

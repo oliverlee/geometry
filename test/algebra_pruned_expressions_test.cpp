@@ -170,4 +170,21 @@ auto main() -> int
 
     return expect(eq(0, T::plus_count) and eq(3, T::multiplies_count));
   };
+
+  "geometric product contracts to zero scalar"_ctest =  //
+      [] {
+        using test = ::test<double>;
+
+        const auto a = 3;
+        const auto b = 4;
+        const auto c = 2;
+
+        const auto x =
+            a * test::e<0> + b * test::e<0, 1> + c * test::e<0, 1, 2>;
+        const auto z = x * x;
+
+        static_assert(std::is_same_v<const test::blade<>, decltype(z)>);
+
+        return expect(eq(0, z));
+      };
 }
