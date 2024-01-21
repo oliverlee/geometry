@@ -9,11 +9,12 @@
 #include "geometry/src/detail/strictly_increasing.hpp"
 #include "geometry/src/geometric_product.hpp"
 #include "geometry/src/get.hpp"
-#include "geometry/src/multivector_for.hpp"
 #include "geometry/src/sum.hpp"
+#include "geometry/src/to_multivector.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <cstddef>
+#include <functional>
 #include <ostream>
 #include <tuple>
 #include <type_traits>
@@ -366,7 +367,6 @@ public:
 
     /// equality comparison
     ///
-    /// @{
     template <class... B2s>
     [[nodiscard]]
     friend constexpr auto
@@ -375,43 +375,6 @@ public:
       return ((get_or(x, Bs{}) == get_or(y, Bs{})) and ...) and
              ((get_or(x, B2s{}) == get_or(y, B2s{})) and ...);
     }
-    template <class... B2s>
-    [[nodiscard]]
-    friend constexpr auto
-    operator!=(const multivector& x, const multivector<B2s...>& y) -> bool
-    {
-      return not(x == y);
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator==(const multivector& x, blade<Is...> y) -> bool
-    {
-      return x == multivector<blade<Is...>>{y};
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator==(blade<Is...> x, const multivector& y) -> bool
-    {
-      return multivector<blade<Is...>>{x} == y;
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator!=(const multivector& x, blade<Is...> y) -> bool
-    {
-      return not(x == y);
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator!=(blade<Is...> x, const multivector& y) -> bool
-    {
-      return not(x == y);
-    }
-
-    /// @}
 
     /// unary negation
     ///
@@ -440,6 +403,25 @@ public:
   };
 };
 
+/// equality comparison
+///
+/// @{
+template <class T, class U, class A = common_algebra_type_t<T, U>>
+[[nodiscard]]
+constexpr auto
+operator==(const T& t, const U& u)
+{
+  return std::equal_to<>{}(to_multivector<A>(t), to_multivector<A>(u));
+}
+template <class T, class U, class A = common_algebra_type_t<T, U>>
+[[nodiscard]]
+constexpr auto
+operator!=(const T& t, const U& u)
+{
+  return not std::equal_to<>{}(to_multivector<A>(t), to_multivector<A>(u));
+}
+/// @}
+
 /// addition
 ///
 template <class T, class U, class A = common_algebra_type_t<T, U>>
@@ -447,10 +429,7 @@ template <class T, class U, class A = common_algebra_type_t<T, U>>
 constexpr auto
 operator+(const T& t, const U& u)
 {
-  using S = typename A::scalar_type;
-  return sum(
-      multivector_for_t<A, T>{detail::construct_if_convertible<S>(t)},
-      multivector_for_t<A, U>{detail::construct_if_convertible<S>(u)});
+  return sum(to_multivector<A>(t), to_multivector<A>(u));
 }
 
 /// subtraction
@@ -470,10 +449,7 @@ template <class T, class U, class A = common_algebra_type_t<T, U>>
 constexpr auto
 operator*(const T& t, const U& u)
 {
-  using S = typename A::scalar_type;
-  return geometric_product(
-      multivector_for_t<A, T>{detail::construct_if_convertible<S>(t)},
-      multivector_for_t<A, U>{detail::construct_if_convertible<S>(u)});
+  return geometric_product(to_multivector<A>(t), to_multivector<A>(u));
 }
 
 }  // namespace geometry
