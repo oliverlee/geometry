@@ -52,6 +52,7 @@ cc_library(
         "src/geometric_product.hpp",
         "src/get.hpp",
         "src/multivector_for.hpp",
+        "src/sum.hpp",
         "src/type_list.hpp",
     ],
     hdrs = ["geometry.hpp"],

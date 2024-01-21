@@ -6,4 +6,5 @@
 #include "geometry/src/geometric_product.hpp"
 #include "geometry/src/get.hpp"
 #include "geometry/src/multivector_for.hpp"
+#include "geometry/src/sum.hpp"
 #include "geometry/src/type_list.hpp"

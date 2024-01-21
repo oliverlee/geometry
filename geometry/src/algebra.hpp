@@ -10,6 +10,7 @@
 #include "geometry/src/geometric_product.hpp"
 #include "geometry/src/get.hpp"
 #include "geometry/src/multivector_for.hpp"
+#include "geometry/src/sum.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <cstddef>
@@ -231,31 +232,12 @@ public:
     {
       return blade{x.coefficient + y.coefficient};
     }
-    template <std::size_t... Js>
-    [[nodiscard]]
-    friend constexpr auto
-    operator+(blade x, blade<Js...> y)
-    {
-      if constexpr (
-          detail::ordered<blade<Js...>>{} < detail::ordered<blade>{}) {
-        return multivector<blade<Js...>, blade>{y, x};
-      } else {
-        return multivector<blade, blade<Js...>>{x, y};
-      }
-    }
-    friend constexpr auto& operator+=(blade& x, blade y) { return x = x + y; }
     /// @}
 
-    /// subtraction
+    /// compound assignment operators
     ///
     /// @{
-    template <std::size_t... Js>
-    [[nodiscard]]
-    friend constexpr auto
-    operator-(blade x, blade<Js...> y)
-    {
-      return x + -y;
-    }
+    friend constexpr auto& operator+=(blade& x, blade y) { return x = x + y; }
     friend constexpr auto& operator-=(blade& x, blade y) { return x = x - y; }
     /// @}
 
@@ -437,80 +419,8 @@ public:
     friend constexpr auto
     operator-(const multivector& x) -> multivector
     {
-      return multivector{-static_cast<Bs>(x)...};
+      return multivector{-get<Bs>(x)...};
     }
-
-    /// addition
-    ///
-    /// @{
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator+(const multivector& x, blade<Is...> y)
-    {
-      return x + multivector<blade<Is...>>{y};
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator+(blade<Is...> x, const multivector& y)
-    {
-      return y + x;
-    }
-    template <class... B2s>
-    [[nodiscard]]
-    friend constexpr auto
-    operator+(const multivector& x, const multivector<B2s...>& y)
-    {
-      using detail::ordered;
-
-      using M = tmp::rebind_into_t<
-          tmp::transform_t<
-              tmp::unique_t<
-                  tmp::sort_t<tmp::list<ordered<Bs>..., ordered<B2s>...>>>,
-              tmp::get_type>,
-          multivector>;
-
-      auto z = M{};
-
-      std::ignore = ((get<Bs>(z) = get<Bs>(x), true) and ...);
-      std::ignore =
-          (((multivector::contains<B2s>
-                 ? get<B2s>(z) += get<B2s>(y)
-                 : get<B2s>(z) = get<B2s>(y)),
-            true) and
-           ...);
-
-      return z;
-    }
-    /// @}
-
-    /// subtraction
-    ///
-    /// @{
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator-(const multivector& x, blade<Is...> y)
-    {
-      return x + -y;
-    }
-    template <std::size_t... Is>
-    [[nodiscard]]
-    friend constexpr auto
-    operator-(blade<Is...> x, const multivector& y)
-    {
-      return x + -y;
-    }
-    template <class... B2s>
-    [[nodiscard]]
-    friend constexpr auto
-    operator-(const multivector& x, const multivector<B2s...>& y)
-        -> decltype(x + y)
-    {
-      return x + -y;
-    }
-    /// @}
 
     /// stream insertion
     ///
@@ -529,6 +439,29 @@ public:
     }
   };
 };
+
+/// addition
+///
+template <class T, class U, class A = common_algebra_type_t<T, U>>
+[[nodiscard]]
+constexpr auto
+operator+(const T& t, const U& u)
+{
+  using S = typename A::scalar_type;
+  return sum(
+      multivector_for_t<A, T>{detail::construct_if_convertible<S>(t)},
+      multivector_for_t<A, U>{detail::construct_if_convertible<S>(u)});
+}
+
+/// subtraction
+///
+template <class T, class U, class A = common_algebra_type_t<T, U>>
+[[nodiscard]]
+constexpr auto
+operator-(const T& t, const U& u)
+{
+  return t + -u;
+}
 
 /// geometric product
 ///
