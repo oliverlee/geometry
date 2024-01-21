@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometry/type_metaprogramming/cartesian_product.hpp"
 #include "geometry/type_metaprogramming/empty.hpp"
 #include "geometry/type_metaprogramming/flatten.hpp"
 #include "geometry/type_metaprogramming/get_type.hpp"

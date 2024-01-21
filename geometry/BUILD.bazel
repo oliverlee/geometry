@@ -3,6 +3,7 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
     name = "type_metaprogramming",
     srcs = [
+        "type_metaprogramming/cartesian_product.hpp",
         "type_metaprogramming/empty.hpp",
         "type_metaprogramming/flatten.hpp",
         "type_metaprogramming/get_type.hpp",
@@ -40,6 +41,7 @@ cc_library(
         "src/detail/blade_list.hpp",
         "src/detail/contract_dimensions.hpp",
         "src/detail/factorial.hpp",
+        "src/detail/geometric_product.hpp",
         "src/detail/ordered.hpp",
         "src/detail/ordered_dimensions.hpp",
         "src/detail/strictly_increasing.hpp",
