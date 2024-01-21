@@ -53,6 +53,7 @@ cc_library(
         "src/get.hpp",
         "src/multivector_for.hpp",
         "src/sum.hpp",
+        "src/to_multivector.hpp",
         "src/type_list.hpp",
     ],
     hdrs = ["geometry.hpp"],
