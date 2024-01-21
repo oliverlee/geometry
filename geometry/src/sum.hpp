@@ -1,7 +1,9 @@
 #pragma once
 
+#include "geometry/src/common_algebra_type.hpp"
 #include "geometry/src/detail/ordered.hpp"
 #include "geometry/src/get.hpp"
+#include "geometry/src/to_multivector.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <tuple>
@@ -10,11 +12,9 @@ namespace geometry {
 
 inline constexpr class
 {
-public:
   template <template <class...> class multivector, class... B1s, class... B2s>
-  [[nodiscard]]
-  constexpr auto
-  operator()(const multivector<B1s...>& x, const multivector<B2s...>& y) const
+  static constexpr auto
+  impl(const multivector<B1s...>& x, const multivector<B2s...>& y)
   {
     using detail::ordered;
 
@@ -36,6 +36,15 @@ public:
          ...);
 
     return z;
+  }
+
+public:
+  template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
+  [[nodiscard]]
+  constexpr auto
+  operator()(const T1& x, const T2& y) const
+  {
+    return impl(to_multivector<A>(x), to_multivector<A>(y));
   }
 } sum{};
 
