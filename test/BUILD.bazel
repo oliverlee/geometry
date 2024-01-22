@@ -47,3 +47,14 @@ cc_test(
         "@skytest",
     ],
 )
+
+cc_test(
+    name = "algebra_dual_test",
+    size = "small",
+    srcs = ["algebra_dual_test.cpp"],
+    deps = [
+        ":test_same",
+        "//:geometry",
+        "@skytest",
+    ],
+)
