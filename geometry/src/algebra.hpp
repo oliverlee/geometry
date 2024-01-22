@@ -7,6 +7,7 @@
 #include "geometry/src/detail/contract_dimensions.hpp"
 #include "geometry/src/detail/ordered.hpp"
 #include "geometry/src/detail/strictly_increasing.hpp"
+#include "geometry/src/exterior_product.hpp"
 #include "geometry/src/geometric_product.hpp"
 #include "geometry/src/get.hpp"
 #include "geometry/src/sum.hpp"
@@ -78,15 +79,22 @@ struct algebra
   ///
   using blade_list_type = detail::blade_list_t<blade>;
 
-private:
+  /// blade product
+  ///
+  /// @{
   template <std::size_t... Is>
-  using reified_blade_t = tmp::convert_to_sequence_t<
-      detail::contract_dimensions_t<
-          detail::contraction_map::projective,
-          tmp::sort_t<tmp::index_constant_list<Is...>>>,
-      blade>;
+  struct reified_blade
+  {
+    using type = tmp::convert_to_sequence_t<
+        detail::contract_dimensions_t<
+            detail::contraction_map::projective,
+            tmp::sort_t<tmp::index_constant_list<Is...>>>,
+        blade>;
+  };
+  template <std::size_t... Is>
+  using reified_blade_t = typename reified_blade<Is...>::type;
+  /// @}
 
-public:
   /// coefficient for blade product
   ///
   /// @{
@@ -101,7 +109,6 @@ public:
                     detail::contraction_map::projective,
                     tmp::sort_t<tmp::index_constant_list<Is...>>>>
   {};
-
   template <std::size_t... Is>
   static constexpr auto reified_blade_coefficient_v =
       reified_blade_coefficient<Is...>::value;
@@ -131,6 +138,10 @@ public:
   template <std::size_t... Is>
   static constexpr auto e =
       reified_blade_t<Is...>{scalar_type{reified_blade_coefficient_v<Is...>}};
+
+  /// pseudoscalar
+  ///
+  static constexpr auto i = tmp::last_t<blade_list_type>{scalar_type{1}};
 
   template <std::size_t... Is>
   struct blade
@@ -450,6 +461,16 @@ constexpr auto
 operator*(const T1& x, const T2& y)
 {
   return geometric_product(x, y);
+}
+
+/// exterior product (wedge)
+///
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
+[[nodiscard]]
+constexpr auto
+operator^(const T1& x, const T2& y)
+{
+  return exterior_product(x, y);
 }
 
 }  // namespace geometry

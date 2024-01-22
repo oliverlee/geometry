@@ -36,3 +36,14 @@ cc_test(
         "@skytest",
     ],
 )
+
+cc_test(
+    name = "algebra_exterior_product_test",
+    size = "small",
+    srcs = ["algebra_exterior_product_test.cpp"],
+    deps = [
+        ":test_same",
+        "//:geometry",
+        "@skytest",
+    ],
+)

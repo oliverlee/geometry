@@ -24,28 +24,27 @@ public:
       class L = detail::pending_dimensions_list_t<D1, D2>>
   constexpr auto
   operator()(expression_template::op<expression_template::multiplies, T1, T2>)
-      const -> std::bool_constant<
-          tmp::convert_to_sequence_t<
-              L,
-              Algebra::template reified_blade_coefficient>::value == 0>
+      const -> std::bool_constant<(
+          tmp::convert_to_sequence_t<L, Algebra::template reified_blade>::type::
+              grade < D1::grade + D2::grade)>
   {
     return {};
   }
-} null_generator{};
+} grade_contracting{};
 
 }  // namespace detail
 
-inline constexpr auto geometric_product = [](const auto& x, const auto& y) {
+inline constexpr auto exterior_product = [](const auto& x, const auto& y) {
   using algebra_type = common_algebra_type_t<
       std::decay_t<decltype(x)>,
       std::decay_t<decltype(y)>>;
-  constexpr auto zero = typename algebra_type::template blade<>{};
+  constexpr auto zero = 0 * algebra_type::i;
 
   return detail::multivector_product(
       to_multivector<algebra_type>(x),
       to_multivector<algebra_type>(y),
       zero,
-      detail::null_generator);
+      detail::grade_contracting);
 };
 
 }  // namespace geometry
