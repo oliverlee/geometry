@@ -26,13 +26,14 @@ namespace geometry {
 /// represents a projective geometric algebra
 /// @tparam S scalar type
 /// @tparam N number of euclidean geometry dimensions
+/// @tparam Dual true if the algebra is the dual (e.g. G* vs G)
 ///
 /// Models an N-dimensional projective geometric algebra denoted as
 /// @f[
 /// P(S^*_{N,0,1})
 /// @f]
 ///
-template <class S, std::size_t N>
+template <class S, std::size_t N, bool Dual = true>
 struct algebra
 {
   /// scalar type
@@ -42,6 +43,10 @@ struct algebra
   /// algebra dimension
   ///
   static constexpr auto dimension = N + 1;
+
+  /// dual algebra type
+  ///
+  using dual_algebra_type = algebra<S, N, not Dual>;
 
   /// blade
   /// @tparam Is dimensions
