@@ -10,6 +10,10 @@
 
 namespace geometry {
 
+/// addition
+///
+/// @{
+
 inline constexpr class
 {
   template <template <class...> class multivector, class... B1s, class... B2s>
@@ -47,5 +51,25 @@ public:
     return impl(to_multivector<A>(x), to_multivector<A>(y));
   }
 } sum{};
+
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
+[[nodiscard]]
+constexpr auto
+operator+(const T1& x, const T2& y)
+{
+  return sum(x, y);
+}
+
+/// @}
+
+/// subtraction
+///
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
+[[nodiscard]]
+constexpr auto
+operator-(const T1& x, const T2& y)
+{
+  return x + -y;
+}
 
 }  // namespace geometry

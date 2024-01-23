@@ -1,7 +1,9 @@
 #pragma once
 
 #include "geometry/expression_template.hpp"
+#include "geometry/src/common_algebra_type.hpp"
 #include "geometry/src/get.hpp"
+#include "geometry/src/to_multivector.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <cstddef>
@@ -71,14 +73,14 @@ inline constexpr class
       class multivector,
       class... B1s,
       class... B2s,
-      class T,
-      class ExprFilter>
+      class ExprFilter,
+      class T>
   static constexpr auto
   impl(tmp::list<Ts...>,
        const multivector<B1s...>& x,
        const multivector<B2s...>& y,
-       const T& zero,
-       ExprFilter pred)
+       ExprFilter pred,
+       const T& zero)
   {
     using expression_template::leaf;
 
@@ -96,23 +98,45 @@ public:
       class multivector,
       class... B1s,
       class... B2s,
-      class T,
-      class ExprFilter>
+      class ExprFilter,
+      class T>
   [[nodiscard]]
   constexpr auto
   operator()(
       const multivector<B1s...>& x,
       const multivector<B2s...>& y,
-      const T& zero,
-      ExprFilter pred) const
+      ExprFilter pred,
+      const T& zero) const
   {
     return impl(
         tmp::cartesian_product_t<tmp::list<B1s...>, tmp::list<B2s...>>{},
         x,
         y,
-        zero,
-        pred);
+        pred,
+        zero);
   }
 } multivector_product{};
+
+template <class Prune, class Zero>
+class product_fn : Zero
+{
+public:
+  constexpr product_fn(Prune, Zero zero_fn) : Zero{std::move(zero_fn)} {}
+
+  template <class T1, class T2, class Algebra = common_algebra_type_t<T1, T2>>
+  constexpr auto operator()(const T1& x, const T2& y) const
+  {
+    const auto& zero_for = static_cast<const Zero&>(*this);
+    return multivector_product(
+        to_multivector<Algebra>(x),
+        to_multivector<Algebra>(y),
+        Prune{},
+        zero_for(Algebra{}));
+  }
+};
+
+inline constexpr auto multivector_product_with = [](auto prune, auto zero_for) {
+  return product_fn{prune, std::move(zero_for)};
+};
 
 }  // namespace geometry::detail

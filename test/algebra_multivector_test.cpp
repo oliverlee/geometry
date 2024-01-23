@@ -137,6 +137,17 @@ auto main() -> int
         return expect(eq(z, x * y) and eq(-z, y * x));
       };
 
+  "geometric product sfinae friendly"_ctest = [] {
+    using a1 = ::geometry::algebra<double, 3>;
+    using a2 = ::geometry::algebra<float, 3>;
+
+    using F = decltype(::geometry::geometric_product);
+
+    return expect(
+        not std::is_invocable_v<F, int, int> and
+        not std::is_invocable_v<F, a1::blade<>, a2::blade<>>);
+  };
+
   "printable"_test = [] {
     static const auto to_string = [](const auto& mvec) {
       return (std::stringstream{} << mvec).str();

@@ -4,7 +4,6 @@
 #include "geometry/src/common_algebra_type.hpp"
 #include "geometry/src/detail/multivector_product.hpp"
 #include "geometry/src/detail/pending_dimensions_list.hpp"
-#include "geometry/src/to_multivector.hpp"
 #include "geometry/type_metaprogramming.hpp"
 
 #include <type_traits>
@@ -34,17 +33,23 @@ public:
 
 }  // namespace detail
 
-inline constexpr auto exterior_product = [](const auto& x, const auto& y) {
-  using algebra_type = common_algebra_type_t<
-      std::decay_t<decltype(x)>,
-      std::decay_t<decltype(y)>>;
-  constexpr auto zero = 0 * algebra_type::i;
+/// exterior product (wedge)
+///
+/// @{
 
-  return detail::multivector_product(
-      to_multivector<algebra_type>(x),
-      to_multivector<algebra_type>(y),
-      zero,
-      detail::grade_contracting);
-};
+inline constexpr auto exterior_product =  //
+    detail::multivector_product_with(     //
+        detail::grade_contracting,
+        [](auto algebra) { return std::decay_t<decltype(algebra.i)>{}; });
+
+template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
+[[nodiscard]]
+constexpr auto
+operator^(const T1& x, const T2& y)
+{
+  return exterior_product(x, y);
+}
+
+/// @}
 
 }  // namespace geometry
