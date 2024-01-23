@@ -80,6 +80,20 @@ struct algebra
   static constexpr auto is_blade_v = is_blade<T>::value;
   /// @}
 
+  /// determines if a type is a multivector
+  /// @tparam T type
+  ///
+  /// @{
+  template <class T>
+  struct is_multivector : std::false_type
+  {};
+  template <class... Bs>
+  struct is_multivector<multivector<Bs...>> : std::true_type
+  {};
+  template <class T>
+  static constexpr auto is_multivector_v = is_multivector<T>::value;
+  /// @}
+
   /// list of blades in the algebra
   ///
   using blade_list_type = detail::blade_list_t<blade>;
