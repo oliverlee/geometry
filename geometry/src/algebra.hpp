@@ -438,44 +438,4 @@ operator!=(const T1& x, const T2& y)
 }
 /// @}
 
-/// addition
-///
-template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
-[[nodiscard]]
-constexpr auto
-operator+(const T1& x, const T2& y)
-{
-  return sum(x, y);
-}
-
-/// subtraction
-///
-template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
-[[nodiscard]]
-constexpr auto
-operator-(const T1& x, const T2& y)
-{
-  return x + -y;
-}
-
-/// geometric product
-///
-template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
-[[nodiscard]]
-constexpr auto
-operator*(const T1& x, const T2& y)
-{
-  return geometric_product(x, y);
-}
-
-/// exterior product (wedge)
-///
-template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
-[[nodiscard]]
-constexpr auto
-operator^(const T1& x, const T2& y)
-{
-  return exterior_product(x, y);
-}
-
 }  // namespace geometry
