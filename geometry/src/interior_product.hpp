@@ -22,32 +22,40 @@ public:
       class Algebra = common_algebra_type_t<D1, D2>,
       class L = detail::pending_dimensions_list_t<D1, D2>,
       class R =
-          typename tmp::convert_to_sequence_t<L, Algebra::template reified_blade>::type>
+          typename tmp::convert_to_sequence_t<L, Algebra::template reified_blade>::type,
+      int k = tmp::convert_to_sequence_t<
+          L,
+          Algebra::template reified_blade_coefficient>::value>
   constexpr auto
   operator()(expression_template::op<expression_template::multiplies, T1, T2>)
-      const -> std::bool_constant<R::grade != D1::grade + D2::grade>
+      const -> std::bool_constant<
+          (R::grade !=
+           std::max(D1::grade, D2::grade) - std::min(D1::grade, D2::grade)) or
+          (k == 0)>
   {
     return {};
   }
-} grade_contracting{};
+} non_grade_contracting{};
 
 }  // namespace detail
 
-/// exterior product (wedge)
+/// interior product
 ///
 /// @{
 
-inline constexpr auto exterior_product =  //
+inline constexpr auto interior_product =  //
     detail::multivector_product_with(     //
-        detail::grade_contracting,
-        [](auto algebra) { return std::decay_t<decltype(algebra.i)>{}; });
+        detail::non_grade_contracting,
+        [](auto algebra) {
+          return typename decltype(algebra)::template blade<>{};
+        });
 
 template <class T1, class T2, class A = common_algebra_type_t<T1, T2>>
 [[nodiscard]]
 constexpr auto
-operator^(const T1& x, const T2& y)
+operator|(const T1& x, const T2& y)
 {
-  return exterior_product(x, y);
+  return interior_product(x, y);
 }
 
 /// @}

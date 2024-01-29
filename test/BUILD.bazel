@@ -79,3 +79,14 @@ cc_test(
         "@skytest",
     ],
 )
+
+cc_test(
+    name = "algebra_interior_product_test",
+    size = "small",
+    srcs = ["algebra_interior_product_test.cpp"],
+    deps = [
+        ":test_same",
+        "//:geometry",
+        "@skytest",
+    ],
+)

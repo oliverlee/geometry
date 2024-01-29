@@ -7,6 +7,7 @@
 #include "geometry/src/exterior_product.hpp"
 #include "geometry/src/geometric_product.hpp"
 #include "geometry/src/get.hpp"
+#include "geometry/src/interior_product.hpp"
 #include "geometry/src/multivector_for.hpp"
 #include "geometry/src/regressive_product.hpp"
 #include "geometry/src/sum.hpp"
