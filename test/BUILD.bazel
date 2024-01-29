@@ -27,6 +27,16 @@ cc_test(
 )
 
 cc_test(
+    name = "algebra_get_test",
+    size = "small",
+    srcs = ["algebra_get_test.cpp"],
+    deps = [
+        "//:geometry",
+        "@skytest",
+    ],
+)
+
+cc_test(
     name = "algebra_pruned_expressions_test",
     size = "small",
     srcs = ["algebra_pruned_expressions_test.cpp"],
