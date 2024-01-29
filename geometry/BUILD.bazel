@@ -57,6 +57,7 @@ cc_library(
         "src/exterior_product.hpp",
         "src/geometric_product.hpp",
         "src/get.hpp",
+        "src/interior_product.hpp",
         "src/multivector_for.hpp",
         "src/regressive_product.hpp",
         "src/sum.hpp",
